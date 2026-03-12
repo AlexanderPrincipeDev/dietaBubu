@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dieta Bubu (Embarazo)</title>
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tabler Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- HEADER -->
+        <header class="main-header">
+            <div class="greeting">
+                <p id="date-display">Miércoles, 11 Mar</p>
+                <h1 id="greeting-title">¡Buenos días, Evelyn! ☀️</h1>
+                <p class="subtitle" id="meal-time-subtitle">Es hora del Desayuno</p>
+            </div>
+            <div class="avatar">
+                <img src="https://api.dicebear.com/7.x/notionists/svg?seed=Evelyn&backgroundColor=ffdfbf" alt="Perfil">
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT AREA (SPA Views) -->
+        <main id="main-content" class="content-wrapper">
+            
+            <!-- VIEW: HOME (Menú del momento) -->
+            <section id="view-home" class="view active">
+                <div class="card glass-card meal-suggester">
+                    <div class="card-header">
+                        <h2>Tu Menú de Ahora</h2>
+                        <button id="btn-generate-random" class="btn-icon ripple" aria-label="Generar otro menú" title="Generar otro al azar">
+                            <i class="ti ti-refresh"></i> Generar Mágico
+                        </button>
+                    </div>
+                    
+                    <div id="meal-portions-container" class="portions-list">
+                        <!-- Portions will be injected here via JS -->
+                        <div class="skeleton-loader">Cargando porciones...</div>
+                    </div>
+                </div>
+
+                <div class="quick-tips mt-4">
+                    <h3>💡 Tip Nutricional</h3>
+                    <p class="tip-card" id="daily-tip">Mastica bien los alimentos y come tranquila.</p>
+                </div>
+            </section>
+
+            <!-- VIEW: TRACKER -->
+            <section id="view-tracker" class="view hidden">
+                <div class="page-title">
+                    <h2>Hábitos Diarios</h2>
+                    <p>Pequeños pasos, gran salud 🥰</p>
+                </div>
+
+                <div class="tracker-card glass-card">
+                    <h3>💧 Consumo de Agua</h3>
+                    <p class="tracker-desc">Meta: 6 a 8 vasos diarios</p>
+                    <div class="water-glasses" id="water-tracker">
+                        <!-- Water glasses rendered via JS -->
+                    </div>
+                </div>
+
+                <div class="tracker-card glass-card mt-3">
+                    <h3>🚶‍♀️ Actividad Física</h3>
+                    <p class="tracker-desc">Caminata leve-moderada (45 min)</p>
+                    <button class="btn-check ripple" id="btn-walk" onclick="app.toggleWalk()"><i class="ti ti-check"></i> Actividad Completada</button>
+                </div>
+            </section>
+
+            <!-- VIEW: SEARCH / PLANNER -->
+            <section id="view-search" class="view hidden">
+                <div class="page-title">
+                    <h2>¿Qué Buscas?</h2>
+                </div>
+                
+                <div class="search-bar">
+                    <i class="ti ti-search"></i>
+                    <input type="text" id="food-search-input" placeholder="Ej. Palta, Huevo, Piña...">
+                </div>
+
+                <div id="search-results" class="search-results mt-3">
+                    <p class="placeholder-text">Escribe un alimento para saber en qué comida encaja y tu porción correcta.</p>
+                </div>
+            </section>
+
+             <!-- VIEW: ALERTS & INFO -->
+             <section id="view-alerts" class="view hidden">
+                <div class="page-title">
+                    <h2>Guía Rápida</h2>
+                </div>
+                
+                <div class="alert-card warning glass-card">
+                    <h3><i class="ti ti-alert-triangle"></i> No Permitidos (Por ahora)</h3>
+                    <ul class="bad-list" id="forbidden-list">
+                        <!-- Populated by JS -->
+                    </ul>
+                </div>
+
+                <div class="info-card glass-card mt-3">
+                    <h3><i class="ti ti-cup"></i> ¿Qué puedo tomar?</h3>
+                    <p>Agua, Manzanilla, Jamaica, Anís, Hierba Luisa, Emoliente, Agua de Piña/Manzana/Durazno, Chicha Morada.</p>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- BOTTOM NAVIGATION -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-target="view-home">
+                <i class="ti ti-home"></i>
+                <span>Menú</span>
+            </button>
+            <button class="nav-item" data-target="view-tracker">
+                <i class="ti ti-droplet"></i>
+                <span>Hábitos</span>
+            </button>
+            <button class="nav-item" data-target="view-search">
+                <i class="ti ti-search"></i>
+                <span>Buscar</span>
+            </button>
+            <button class="nav-item" data-target="view-alerts">
+                <i class="ti ti-info-circle"></i>
+                <span>Guía</span>
+            </button>
+        </nav>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script src="js/generator.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

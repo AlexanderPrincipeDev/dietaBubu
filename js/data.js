@@ -137,5 +137,5 @@ const dietaBubu = {
     }
 };
 
-// Exportar para acceso desde otros modulos
+// Exportar para acceso desde otros modulos |
 window.dietaBubu = dietaBubu;

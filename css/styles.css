@@ -622,3 +622,24 @@ body.dark-mode .bottom-nav {
     gap: 0.5rem;
     margin-bottom: 1rem;
 }
+
+/* Craving Card */
+.craving-card {
+    background: linear-gradient(135deg, rgba(255, 138, 101, 0.05), rgba(255, 138, 101, 0.15));
+    border-left: 4px solid var(--primary);
+    padding: 1rem;
+    border-radius: var(--radius-sm);
+}
+
+.craving-card h3 {
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+body.dark-mode .craving-card {
+    background: linear-gradient(135deg, rgba(255, 138, 101, 0.1), rgba(255, 138, 101, 0.2));
+}

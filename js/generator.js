@@ -118,21 +118,35 @@ class DietGenerator {
         if (!query.trim()) return [];
         query = query.toLowerCase();
 
+        // 1. Check for cravings (Antojos)
+        if (this.data.antojos) {
+            for (const [antojo, sustituto] of Object.entries(this.data.antojos)) {
+                if (antojo.includes(query) || query.includes(antojo)) {
+                    return [{
+                        isWarning: false,
+                        isCraving: true,
+                        antojoBuscado: antojo,
+                        sustituto: sustituto
+                    }];
+                }
+            }
+        }
+
         let results = [];
 
-        // Buscar en qué categorías está el alimento
+        // 2. Busqueda en categorias normales
         const categoryMatches = [];
-        for (const [cat, alimentos] of Object.entries(this.data.alimentos)) {
-            const found = alimentos.filter(a => a.toLowerCase().includes(query));
+        for (const [catName, options] of Object.entries(this.data.alimentos)) {
+            const found = options.filter(opt => opt.toLowerCase().includes(query));
             if (found.length > 0) {
                 categoryMatches.push({
-                    categoria: cat,
+                    categoria: catName,
                     ejemplos: found
                 });
             }
         }
 
-        // Si no está en ninguna categoría, quizas sea de alertas
+        // 3. Si no está en ninguna categoría, revisar alertas de No Permitidos
         if (categoryMatches.length === 0) {
             const malMatch = this.data.noPermitidos.find(n => n.toLowerCase().includes(query));
             if (malMatch) {

@@ -349,11 +349,17 @@ class DietaApp {
             const results = this.generator.searchFood(query);
 
             if (results.length === 0) {
-                resultsContainer.innerHTML = '<p class="placeholder-text">No encontré ese alimento en la lista de la dieta. Asegúrate de escribirlo bien o consultar a Evelyn Puerta.</p>';
+                resultsContainer.innerHTML = '<p class="placeholder-text">No encontré ese alimento en la lista de la dieta. Asegúrate de escribirlo bien o consultar a Evelyn.</p>';
             } else {
                 let html = '';
                 results.forEach(res => {
-                    if (res.isWarning) {
+                    if (res.isCraving) {
+                        html += `
+                        <div class="craving-card mb-2" style="margin-bottom: 15px;">
+                            <h3><i class="ti ti-heart-handshake"></i> ¿Antojo de ${res.antojoBuscado}?</h3>
+                            <p style="color:var(--text-main); font-size:0.95rem; margin-top:0.3rem;"><strong>Mejor prueba esto:</strong> ${res.sustituto}</p>
+                        </div>`;
+                    } else if (res.isWarning) {
                         html += `<div class="alert-card warning glass-card mb-2" style="margin-bottom: 10px;">${res.message}</div>`;
                     } else {
                         html += `

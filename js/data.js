@@ -20,6 +20,16 @@ const dietaBubu = {
         "Manzanilla", "Jamaica", "Anís", "Hierba Luisa", "Emoliente", "Agua",
         "Agua de piña", "Agua de manzana", "Agua de durazno", "Chicha morada"
     ],
+    // Sustitutos Inteligentes de Antojos
+    "antojos": {
+        "papas fritas": "Papas al horno con orégano o bastones de Camote asado 🍠",
+        "chocolate": "1 cuadradito de chocolate amargo (sobre 70% cacao) 🍫",
+        "gaseosa": "Agua con gas, rodajas de limón/naranja y hielo 🧊🍋",
+        "dulce": "1 porción de tu fruta favorita (ej. Mango, Plátano, Fresas) 🍓",
+        "pizza": "Pita pizza (pan pita integral, salsa de tomate natural, queso mozzarella y orégano) 🍕",
+        "helado": "Helado de plátano congelado licuado con un chorrito de leche o yogurt 🍌🍦",
+        "galletas": "Galletas de avena caseras (Avena + plátano machacado al horno) 🍪"
+    },
     "comidas": {
         "desayuno": {
             "horaAprox": "8:00am",

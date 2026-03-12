@@ -90,7 +90,7 @@ class DietaApp {
             greeting = '¡Buenas noches';
             emoji = '🌙';
         }
-        greetingTitle.textContent = `${greeting}, Evelyn! ${emoji}`;
+        greetingTitle.textContent = `${greeting}, Evelyn!!! ${emoji}`;
 
         // Subtítulo
         subtitleElement.textContent = `Es hora de tu ${this.generator.formatMealName(this.currentMealId)}`;
@@ -125,53 +125,78 @@ class DietaApp {
 
         container.innerHTML = ''; // Limpiar
 
-        // Para cada porción generada:
+        // 1. Agrupar los items por categoria
+        const groupedItems = {};
         menuData.items.forEach(item => {
-            const el = document.createElement('div');
-            el.className = 'portion-item section-anim';
+            if (!groupedItems[item.categoria]) {
+                groupedItems[item.categoria] = [];
+            }
+            groupedItems[item.categoria].push(item);
+        });
 
-            // Iconos base segun categoria
-            const iconMap = {
-                'lacteos': '🥛',
-                'huevos': '🥚',
-                'cereales': '🌾',
-                'cereales_cena': '🥔',
-                'fruta': '🍎',
-                'grasas': '🥑',
-                'verduras': '🥗',
-                'carne': '🥩'
-            };
+        // 2. Renderizar grupos
+        for (const [categoria, items] of Object.entries(groupedItems)) {
+            // Contenedor del grupo
+            const groupDiv = document.createElement('div');
+            groupDiv.className = 'category-group mt-3';
 
-            const isLockedBtn = item.isLocked ? 'locked' : '';
-            const lockIcon = item.isLocked ? 'ti-lock' : 'ti-lock-open';
+            // Titulo de la categoria
+            let catTitle = categoria.toUpperCase();
+            if (catTitle === 'CEREALES_CENA') catTitle = 'CEREALES (CENA)';
 
-            el.innerHTML = `
-                <div class="portion-icon">${iconMap[item.categoria] || '🍽️'}</div>
-                <div class="portion-text">
-                    <h4>${item.categoria}</h4>
-                    <p>${item.name}</p>
-                </div>
-                <button class="btn-lock ${isLockedBtn}" data-key="${item.lockedKey}" data-name="${item.name}" aria-label="Fijar ingrediente">
-                    <i class="ti ${lockIcon}"></i>
-                </button>
-            `;
+            const titleEl = document.createElement('h3');
+            titleEl.className = 'category-title';
+            titleEl.textContent = catTitle;
+            groupDiv.appendChild(titleEl);
 
-            // Setup Event Listener for Lock Button
-            el.querySelector('.btn-lock').addEventListener('click', (e) => {
-                const btn = e.currentTarget;
-                const lockedState = this.generator.toggleLock(btn.dataset.key, btn.dataset.name);
+            // Renderizar los items de esta categoria
+            items.forEach(item => {
+                const el = document.createElement('div');
+                el.className = 'portion-item section-anim';
 
-                if (lockedState) {
-                    btn.classList.add('locked');
-                    btn.querySelector('i').className = 'ti ti-lock';
-                } else {
-                    btn.classList.remove('locked');
-                    btn.querySelector('i').className = 'ti ti-lock-open';
-                }
+                const iconMap = {
+                    'lacteos': '🥛',
+                    'huevos': '🥚',
+                    'cereales': '🌾',
+                    'cereales_cena': '🥔',
+                    'fruta': '🍎',
+                    'grasas': '🥑',
+                    'verduras': '🥗',
+                    'carne': '🥩'
+                };
+
+                const isLockedBtn = item.isLocked ? 'locked' : '';
+                const lockIcon = item.isLocked ? 'ti-lock' : 'ti-lock-open';
+
+                el.innerHTML = `
+                    <div class="portion-icon">${iconMap[item.categoria] || '🍽️'}</div>
+                    <div class="portion-text">
+                        <p>${item.name}</p>
+                    </div>
+                    <button class="btn-lock ${isLockedBtn}" data-key="${item.lockedKey}" data-name="${item.name}" aria-label="Fijar ingrediente">
+                        <i class="ti ${lockIcon}"></i>
+                    </button>
+                `;
+
+                // Setup Event Listener for Lock Button
+                el.querySelector('.btn-lock').addEventListener('click', (e) => {
+                    const btn = e.currentTarget;
+                    const lockedState = this.generator.toggleLock(btn.dataset.key, btn.dataset.name);
+
+                    if (lockedState) {
+                        btn.classList.add('locked');
+                        btn.querySelector('i').className = 'ti ti-lock';
+                    } else {
+                        btn.classList.remove('locked');
+                        btn.querySelector('i').className = 'ti ti-lock-open';
+                    }
+                });
+
+                groupDiv.appendChild(el);
             });
 
-            container.appendChild(el);
-        });
+            container.appendChild(groupDiv);
+        }
     }
 
     /* --- TRACKER DE HÁBITOS --- */

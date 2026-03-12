@@ -25,7 +25,10 @@
                 <h1 id="greeting-title">¡Buenos días, Evelyn! ☀️</h1>
                 <p class="subtitle" id="meal-time-subtitle">Es hora del Desayuno</p>
             </div>
-            <div class="avatar">
+            <div class="avatar" style="display: flex; align-items: center; gap: 1rem;">
+                <button id="btn-dark-mode" class="btn-icon" aria-label="Toggle Dark Mode" style="padding: 0.5rem;">
+                    <i class="ti ti-moon"></i>
+                </button>
                 <img src="https://api.dicebear.com/7.x/notionists/svg?seed=Evelyn&backgroundColor=ffdfbf" alt="Perfil">
             </div>
         </header>
@@ -159,6 +162,9 @@
             </button>
         </nav>
     </div>
+
+    <!-- Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@latest/dist/confetti.browser.min.js"></script>
 
     <script src="js/data.js"></script>
     <script src="js/generator.js"></script>

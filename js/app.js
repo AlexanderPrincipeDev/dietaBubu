@@ -9,6 +9,10 @@ class DietaApp {
         this.waterGlasses = parseInt(localStorage.getItem('waterGlasses')) || 0;
         this.hasWalked = localStorage.getItem('hasWalked') === 'true';
         this.lastCheckDate = localStorage.getItem('lastCheckDate');
+        this.isDarkMode = localStorage.getItem('isDarkMode') === 'true';
+
+        // Aplicar Dark Mode inicial
+        if (this.isDarkMode) document.body.classList.add('dark-mode');
 
         // Inicialización
         this.init();
@@ -16,6 +20,7 @@ class DietaApp {
 
     init() {
         this.checkNewDay();
+        this.setupDarkMode();
         this.setupNavigation();
         this.setupHeader();
         this.setupGenerator();
@@ -37,6 +42,30 @@ class DietaApp {
             localStorage.setItem('hasWalked', false);
             localStorage.setItem('lastCheckDate', today);
         }
+    }
+
+    /* --- DARK MODE --- */
+    setupDarkMode() {
+        const btnDark = document.getElementById('btn-dark-mode');
+        const icon = btnDark.querySelector('i');
+
+        // Estado inicial icono
+        if (this.isDarkMode) {
+            icon.className = 'ti ti-sun';
+        }
+
+        btnDark.addEventListener('click', () => {
+            this.isDarkMode = !this.isDarkMode;
+            localStorage.setItem('isDarkMode', this.isDarkMode);
+            document.body.classList.toggle('dark-mode');
+
+            // Toggle Icon
+            icon.className = this.isDarkMode ? 'ti ti-sun' : 'ti ti-moon';
+
+            // Pequeña animacion boton
+            btnDark.style.transform = 'scale(0.8) rotate(90deg)';
+            setTimeout(() => btnDark.style.transform = 'none', 200);
+        });
     }
 
     /* --- NAVIGATION MODO SPA --- */
@@ -242,6 +271,12 @@ class DietaApp {
                     this.waterGlasses = i + 1;
                 }
                 localStorage.setItem('waterGlasses', this.waterGlasses);
+
+                // Trigger Confetti si completa los 8 vasos
+                if (this.waterGlasses === 8) {
+                    this.triggerConfetti();
+                }
+
                 this.renderWaterTracker();
             });
             container.appendChild(glass);
@@ -263,6 +298,7 @@ class DietaApp {
                 walkIcon.style.animation = 'none';
                 walkIcon.textContent = '🧘‍♀️';
             }
+            this.triggerConfetti(); // Celebración
         } else {
             if (walkBtn) {
                 walkBtn.classList.remove('checked');
@@ -272,6 +308,28 @@ class DietaApp {
                 walkIcon.style.animation = 'bounce 2s infinite ease-in-out';
                 walkIcon.textContent = '🏃‍♀️';
             }
+        }
+    }
+
+    /* --- EFECTOS PREMIUM --- */
+    triggerConfetti() {
+        if (typeof confetti !== 'undefined') {
+            const count = 200;
+            const defaults = {
+                origin: { y: 0.7 }
+            };
+
+            function fire(particleRatio, opts) {
+                confetti(Object.assign({}, defaults, opts, {
+                    particleCount: Math.floor(count * particleRatio)
+                }));
+            }
+
+            fire(0.25, { spread: 26, startVelocity: 55 });
+            fire(0.2, { spread: 60 });
+            fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+            fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+            fire(0.1, { spread: 120, startVelocity: 45 });
         }
     }
 

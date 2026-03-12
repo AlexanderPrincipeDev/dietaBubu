@@ -71,12 +71,26 @@ class DietaApp {
     setupHeader() {
         const dateElement = document.getElementById('date-display');
         const subtitleElement = document.getElementById('meal-time-subtitle');
+        const greetingTitle = document.getElementById('greeting-title');
 
         // Formato fecha
         const dateOptions = { weekday: 'long', month: 'short', day: 'numeric' };
         let dateString = new Date().toLocaleDateString('es-ES', dateOptions);
         dateString = dateString.charAt(0).toUpperCase() + dateString.slice(1);
         dateElement.textContent = dateString;
+
+        // Dynamic Greeting Good Morning/Afternoon/Night
+        const hour = new Date().getHours();
+        let greeting = '¡Buenos días';
+        let emoji = '☀️';
+        if (hour >= 12 && hour < 19) {
+            greeting = '¡Buenas tardes';
+            emoji = '🌤️';
+        } else if (hour >= 19 || hour < 5) {
+            greeting = '¡Buenas noches';
+            emoji = '🌙';
+        }
+        greetingTitle.textContent = `${greeting}, Evelyn! ${emoji}`;
 
         // Subtítulo
         subtitleElement.textContent = `Es hora de tu ${this.generator.formatMealName(this.currentMealId)}`;
@@ -121,6 +135,7 @@ class DietaApp {
                 'lacteos': '🥛',
                 'huevos': '🥚',
                 'cereales': '🌾',
+                'cereales_cena': '🥔',
                 'fruta': '🍎',
                 'grasas': '🥑',
                 'verduras': '🥗',

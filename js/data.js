@@ -57,7 +57,7 @@ const dietaBubu = {
         "cena": {
             "horaAprox": "8:00pm",
             "porciones": [
-                { "categoria": "cereales", "cantidad": 1 },
+                { "categoria": "cereales_cena", "cantidad": 1 },
                 { "categoria": "verduras", "cantidad": 3 },
                 { "categoria": "carne", "cantidad": 2 },
                 { "categoria": "grasas", "cantidad": 2 }
@@ -88,8 +88,10 @@ const dietaBubu = {
             "2 cda de avena cruda / tostada (priorizar 2-3 veces x semana)",
             "1 tortilla chica de maíz",
             "1 pan sin gluten / integral de panadería (30g)",
-            "½ pan sin gluten de supermercado (30g)",
-            "½ taza de arroz/quinua cocida (preferible integral)",
+            "½ pan sin gluten de supermercado (30g)"
+        ],
+        "cereales_cena": [
+            "½ taza de cereal cocido como: arroz, quinua (preferible integral)",
             "½ taza de pasta sin gluten",
             "½ taza de puré (papa, camote, yuca)",
             "1 papa pequeña hervida con cáscara",

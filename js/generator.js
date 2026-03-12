@@ -155,9 +155,14 @@ class DietGenerator {
                 }
             }
 
+            let formattedCat = match.categoria.toUpperCase();
+            if (formattedCat === 'CEREALES_CENA') {
+                formattedCat = 'CEREALES (CENA)';
+            }
+
             results.push({
                 isWarning: false,
-                categoria: match.categoria.toUpperCase(),
+                categoria: formattedCat,
                 alimentosReales: match.ejemplos,
                 comidasPosibles: compatibleMeals
             });

@@ -64,18 +64,30 @@
                 </div>
 
                 <div class="tracker-card glass-card">
-                    <h3>💧 Consumo de Agua</h3>
-                    <p class="tracker-desc">Meta: 6 a 8 vasos diarios</p>
-                    <div class="water-glasses" id="water-tracker">
-                        <!-- Water glasses rendered via JS -->
+                    <div class="water-tracker-container">
+                        <div style="text-align: center;">
+                            <h3>💧 Consumo de Agua</h3>
+                            <p class="tracker-desc">Meta: 6 a 8 vasos diarios</p>
+                            <div class="water-progress-text" id="water-progress-text">0/8 Vasos</div>
+                        </div>
+                        <div class="water-glasses" id="water-tracker">
+                            <!-- Water glasses rendered via JS -->
+                        </div>
                     </div>
                 </div>
 
                 <div class="tracker-card glass-card mt-3">
-                    <h3>🚶‍♀️ Actividad Física</h3>
-                    <p class="tracker-desc">Caminata leve-moderada (45 min)</p>
-                    <button class="btn-check ripple" id="btn-walk" onclick="app.toggleWalk()"><i
-                            class="ti ti-check"></i> Actividad Completada</button>
+                    <div class="walk-tracker-container">
+                        <div>
+                            <h3>🚶‍♀️ Actividad Física</h3>
+                            <p class="tracker-desc">Caminata leve-moderada (45 min)</p>
+                        </div>
+                        <div class="walk-illustration" id="walk-icon">
+                            🏃‍♀️
+                        </div>
+                        <button class="btn-check ripple" id="btn-walk" onclick="app.toggleWalk()"><i
+                                class="ti ti-check"></i> Marcar Completada</button>
+                    </div>
                 </div>
             </section>
 
@@ -99,20 +111,29 @@
             <!-- VIEW: ALERTS & INFO -->
             <section id="view-alerts" class="view hidden">
                 <div class="page-title">
-                    <h2>Guía Rápida</h2>
+                    <h2>Guía Nutricional</h2>
+                    <p>Recomendaciones de tu nutricionista 📋</p>
                 </div>
 
-                <div class="alert-card warning glass-card">
-                    <h3><i class="ti ti-alert-triangle"></i> No Permitidos (Por ahora)</h3>
-                    <ul class="bad-list" id="forbidden-list">
+                <div class="guide-section glass-card mt-3">
+                    <h3><i class="ti ti-heartbeat text-primary"></i> Recomendaciones Generales</h3>
+                    <div id="general-tips-list" class="tips-grid">
                         <!-- Populated by JS -->
-                    </ul>
+                    </div>
                 </div>
 
-                <div class="info-card glass-card mt-3">
-                    <h3><i class="ti ti-cup"></i> ¿Qué puedo tomar?</h3>
-                    <p>Agua, Manzanilla, Jamaica, Anís, Hierba Luisa, Emoliente, Agua de Piña/Manzana/Durazno, Chicha
-                        Morada.</p>
+                <div class="guide-section glass-card mt-3">
+                    <h3><i class="ti ti-cup text-secondary"></i> Bebidas Permitidas</h3>
+                    <div id="allowed-drinks-list" class="chips-container mt-2">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <div class="alert-card warning glass-card mt-3 mb-4">
+                    <h3><i class="ti ti-alert-octagon text-danger"></i> Evitar por ahora</h3>
+                    <div id="forbidden-list" class="forbidden-grid mt-2">
+                        <!-- Populated by JS -->
+                    </div>
                 </div>
             </section>
 

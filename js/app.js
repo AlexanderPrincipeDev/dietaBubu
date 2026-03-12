@@ -203,22 +203,35 @@ class DietaApp {
     setupTracker() {
         this.renderWaterTracker();
         const walkBtn = document.getElementById('btn-walk');
+        const walkIcon = document.getElementById('walk-icon');
 
         if (this.hasWalked) {
-            walkBtn.classList.add('checked');
-            walkBtn.innerHTML = '<i class="ti ti-check"></i> ¡Caminata Lograda! 🎉';
+            if (walkBtn) {
+                walkBtn.classList.add('checked');
+                walkBtn.innerHTML = '<i class="ti ti-check"></i> ¡Caminata Lograda! 🎉';
+            }
+            if (walkIcon) {
+                walkIcon.style.animation = 'none';
+                walkIcon.textContent = '🧘‍♀️'; // Change icon to resting/relaxed when done
+            }
         }
     }
 
     renderWaterTracker() {
         const container = document.getElementById('water-tracker');
+        const progressText = document.getElementById('water-progress-text');
+
         container.innerHTML = '';
+        if (progressText) {
+            progressText.textContent = `${this.waterGlasses}/8 Vasos`;
+        }
 
         // 8 Vasos
         for (let i = 0; i < 8; i++) {
             const glass = document.createElement('div');
             glass.className = `glass ${i < this.waterGlasses ? 'filled' : ''}`;
-            glass.innerHTML = '<i class="ti ti-droplet"></i>';
+            // Use drop icon instead of droplet for the new shape
+            glass.innerHTML = '<i class="ti ti-drop"></i>';
             glass.dataset.index = i;
 
             glass.addEventListener('click', () => {
@@ -239,13 +252,26 @@ class DietaApp {
         this.hasWalked = !this.hasWalked;
         localStorage.setItem('hasWalked', this.hasWalked);
         const walkBtn = document.getElementById('btn-walk');
+        const walkIcon = document.getElementById('walk-icon');
 
         if (this.hasWalked) {
-            walkBtn.classList.add('checked');
-            walkBtn.innerHTML = '<i class="ti ti-check"></i> ¡Caminata Lograda! 🎉';
+            if (walkBtn) {
+                walkBtn.classList.add('checked');
+                walkBtn.innerHTML = '<i class="ti ti-check"></i> ¡Caminata Lograda! 🎉';
+            }
+            if (walkIcon) {
+                walkIcon.style.animation = 'none';
+                walkIcon.textContent = '🧘‍♀️';
+            }
         } else {
-            walkBtn.classList.remove('checked');
-            walkBtn.innerHTML = '<i class="ti ti-check"></i> Actividad Completada';
+            if (walkBtn) {
+                walkBtn.classList.remove('checked');
+                walkBtn.innerHTML = '<i class="ti ti-check"></i> Marcar Completada';
+            }
+            if (walkIcon) {
+                walkIcon.style.animation = 'bounce 2s infinite ease-in-out';
+                walkIcon.textContent = '🏃‍♀️';
+            }
         }
     }
 
@@ -291,14 +317,43 @@ class DietaApp {
         });
     }
 
-    /* --- ALERTAS --- */
+    /* --- GUÍA Y ALERTAS --- */
     setupAlerts() {
+        // Forbidden
         const forbiddenList = document.getElementById('forbidden-list');
-        this.generator.data.noPermitidos.forEach(item => {
-            const li = document.createElement('li');
-            li.textContent = item;
-            forbiddenList.appendChild(li);
-        });
+        if (forbiddenList) {
+            forbiddenList.innerHTML = '';
+            this.generator.data.noPermitidos.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'forbidden-item';
+                div.innerHTML = `<i class="ti ti-x"></i> <span>${item}</span>`;
+                forbiddenList.appendChild(div);
+            });
+        }
+
+        // Drinks
+        const drinksList = document.getElementById('allowed-drinks-list');
+        if (drinksList) {
+            drinksList.innerHTML = '';
+            this.generator.data.bebidasPermitidas.forEach(item => {
+                const span = document.createElement('span');
+                span.className = 'chip drink-chip';
+                span.textContent = item;
+                drinksList.appendChild(span);
+            });
+        }
+
+        // General Tips
+        const tipsList = document.getElementById('general-tips-list');
+        if (tipsList) {
+            tipsList.innerHTML = '';
+            this.generator.data.recomendacionesGenerales.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'tip-item';
+                div.innerHTML = `<i class="ti ti-check"></i> <p>${item}</p>`;
+                tipsList.appendChild(div);
+            });
+        }
     }
 }
 

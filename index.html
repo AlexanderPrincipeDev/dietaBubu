@@ -52,6 +52,15 @@
                         </button>
                     </div>
 
+                    <!-- Meal Selector Tabs -->
+                    <div class="meal-tabs" id="meal-tabs">
+                        <button class="meal-tab" data-meal="desayuno">☀️ Desayuno</button>
+                        <button class="meal-tab" data-meal="media_manana">🍎 Media Mañana</button>
+                        <button class="meal-tab" data-meal="almuerzo">🍽️ Almuerzo</button>
+                        <button class="meal-tab" data-meal="media_tarde">🫐 Media Tarde</button>
+                        <button class="meal-tab" data-meal="cena">🌙 Cena</button>
+                    </div>
+
                     <div id="meal-portions-container" class="portions-list">
                         <!-- Portions will be injected here via JS -->
                         <div class="skeleton-loader">Cargando porciones...</div>
@@ -95,6 +104,29 @@
                         </div>
                         <button class="btn-check ripple" id="btn-walk" onclick="app.toggleWalk()"><i
                                 class="ti ti-check"></i> Marcar Completada</button>
+                    </div>
+                </div>
+
+                <!-- Weight Tracker Card -->
+                <div class="tracker-card glass-card mt-3" id="weight-tracker-card">
+                    <h3>⚖️ Registro de Peso</h3>
+                    <p class="tracker-desc">Registra tu peso diario y ve tu evolución</p>
+
+                    <div class="weight-input-row mt-2">
+                        <div class="weight-input-wrap">
+                            <input type="number" id="weight-input" placeholder="Ej. 68.5" step="0.1" min="30" max="200">
+                            <span class="weight-unit">kg</span>
+                        </div>
+                        <button class="btn-register-weight ripple" id="btn-register-weight">
+                            <i class="ti ti-check"></i> Guardar
+                        </button>
+                    </div>
+
+                    <div id="weight-summary" class="weight-summary hidden"></div>
+
+                    <div class="weight-chart-wrap mt-3">
+                        <canvas id="weight-chart" width="400" height="180"></canvas>
+                        <p id="weight-chart-empty" class="placeholder-text" style="text-align:center; padding: 1rem 0;">Registra al menos 2 días para ver la gráfica 📈</p>
                     </div>
                 </div>
             </section>

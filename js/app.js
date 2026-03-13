@@ -10,6 +10,7 @@ class DietaApp {
         this.hasWalked = localStorage.getItem('hasWalked') === 'true';
         this.lastCheckDate = localStorage.getItem('lastCheckDate');
         this.isDarkMode = localStorage.getItem('isDarkMode') === 'true';
+        this.weightLog = JSON.parse(localStorage.getItem('weightLog')) || [];
 
         // Aplicar Dark Mode inicial
         if (this.isDarkMode) document.body.classList.add('dark-mode');
@@ -24,7 +25,9 @@ class DietaApp {
         this.setupNavigation();
         this.setupHeader();
         this.setupGenerator();
+        this.setupMealTabs();
         this.setupTracker();
+        this.setupWeightTracker();
         this.setupSearch();
         this.setupAlerts();
     }
@@ -141,6 +144,48 @@ class DietaApp {
 
         // Renderizar por primera vez
         this.renderMenu();
+    }
+
+    /* --- SELECTOR MANUAL DE COMIDA (TABS) --- */
+    setupMealTabs() {
+        const tabs = document.querySelectorAll('.meal-tab');
+
+        // Activar el tab correspondiente a la hora actual
+        tabs.forEach(tab => {
+            if (tab.dataset.meal === this.currentMealId) {
+                tab.classList.add('active');
+                // Scroll the active tab into center view
+                setTimeout(() => tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }), 100);
+            }
+
+            tab.addEventListener('click', () => {
+                const selectedMeal = tab.dataset.meal;
+                if (selectedMeal === this.currentMealId) return; // Ya está activo
+
+                // Update active tab style
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                // Update state
+                this.currentMealId = selectedMeal;
+                this.generator.clearLocks();
+
+                // Update header subtitle
+                const subtitleEl = document.getElementById('meal-time-subtitle');
+                if (subtitleEl) subtitleEl.textContent = `Viendo: ${this.generator.formatMealName(selectedMeal)}`;
+
+                // Animate + re-render
+                const container = document.getElementById('meal-portions-container');
+                container.style.opacity = '0';
+                container.style.transform = 'translateY(8px)';
+                setTimeout(() => {
+                    this.renderMenu();
+                    container.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+                    container.style.opacity = '1';
+                    container.style.transform = 'none';
+                }, 200);
+            });
+        });
     }
 
     renderMenu() {
@@ -418,6 +463,242 @@ class DietaApp {
                 tipsList.appendChild(div);
             });
         }
+    }
+
+    /* --- REGISTRO DE PESO (Feature #3) --- */
+    setupWeightTracker() {
+        const btn = document.getElementById('btn-register-weight');
+        const input = document.getElementById('weight-input');
+
+        // Render initial state
+        this.renderWeightSummary();
+        this.renderWeightChart();
+
+        btn.addEventListener('click', () => {
+            const val = parseFloat(input.value);
+            if (isNaN(val) || val < 30 || val > 250) {
+                input.style.borderColor = 'var(--danger)';
+                setTimeout(() => input.style.borderColor = '', 1200);
+                return;
+            }
+
+            const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+            // Sobreescribir si ya hay registro de hoy
+            const existingIdx = this.weightLog.findIndex(e => e.date === today);
+            if (existingIdx >= 0) {
+                this.weightLog[existingIdx].weight = val;
+            } else {
+                this.weightLog.push({ date: today, weight: val });
+            }
+
+            // Mantener solo los últimos 90 días
+            if (this.weightLog.length > 90) this.weightLog.shift();
+
+            localStorage.setItem('weightLog', JSON.stringify(this.weightLog));
+            input.value = '';
+
+            // Feedback visual button
+            btn.innerHTML = '<i class="ti ti-check"></i> ¡Guardado!';
+            btn.style.background = 'var(--success)';
+            setTimeout(() => {
+                btn.innerHTML = '<i class="ti ti-check"></i> Guardar';
+                btn.style.background = '';
+            }, 1800);
+
+            if (this.weightLog.length === 8) this.triggerConfetti();
+
+            this.renderWeightSummary();
+            this.renderWeightChart();
+        });
+    }
+
+    renderWeightSummary() {
+        const summaryEl = document.getElementById('weight-summary');
+        if (!summaryEl) return;
+
+        const log = this.weightLog;
+        if (log.length === 0) {
+            summaryEl.classList.add('hidden');
+            return;
+        }
+
+        summaryEl.classList.remove('hidden');
+        const latest = log[log.length - 1];
+        const prev = log.length >= 2 ? log[log.length - 2] : null;
+
+        let badgeHtml = '';
+        if (prev) {
+            const diff = (latest.weight - prev.weight).toFixed(1);
+            const sign = diff > 0 ? '+' : '';
+            const cls = diff < 0 ? 'down' : diff > 0 ? 'up' : 'same';
+            const emoji = diff < 0 ? '↓' : diff > 0 ? '↑' : '=';
+            badgeHtml = `<span class="weight-badge ${cls}">${emoji} ${sign}${diff} kg</span>`;
+        }
+
+        summaryEl.innerHTML = `
+            <span class="weight-current">${latest.weight.toFixed(1)}</span>
+            <span class="weight-unit-label">kg</span>
+            <small style="color:var(--text-muted); font-size:0.78rem;">${latest.date}</small>
+            ${badgeHtml}
+        `;
+    }
+
+    renderWeightChart() {
+        const canvas = document.getElementById('weight-chart');
+        const emptyMsg = document.getElementById('weight-chart-empty');
+        if (!canvas) return;
+
+        // Show last 14 entries max for readability
+        const data = this.weightLog.slice(-14);
+
+        if (data.length < 2) {
+            // Single entry: show a centered point with label
+            if (data.length === 0) {
+                canvas.style.display = 'none';
+                if (emptyMsg) emptyMsg.style.display = 'block';
+                return;
+            }
+
+            canvas.style.display = 'block';
+            if (emptyMsg) emptyMsg.style.display = 'none';
+
+            const ctx = canvas.getContext('2d');
+            const W = canvas.width;
+            const H = canvas.height;
+            ctx.clearRect(0, 0, W, H);
+            const isDark = document.body.classList.contains('dark-mode');
+            const textColor = isDark ? '#bcaaa4' : '#8d6e63';
+
+            ctx.beginPath();
+            ctx.arc(W / 2, H / 2, 10, 0, Math.PI * 2);
+            ctx.fillStyle = '#ff8a65';
+            ctx.fill();
+            ctx.strokeStyle = isDark ? '#3e322f' : 'white';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            ctx.fillStyle = textColor;
+            ctx.font = 'bold 14px Outfit, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(`${data[0].weight} kg`, W / 2, H / 2 - 20);
+
+            const parts = data[0].date.split('-');
+            ctx.font = '11px Outfit, sans-serif';
+            ctx.fillText(`${parts[2]}/${parts[1]}/${parts[0]}`, W / 2, H / 2 + 28);
+            ctx.fillStyle = 'rgba(141,110,99,0.25)';
+            ctx.font = '11px Outfit, sans-serif';
+            ctx.fillText('Registra más días para ver la tendencia →', W / 2, H - 12);
+            return;
+        }
+
+        canvas.style.display = 'block';
+        if (emptyMsg) emptyMsg.style.display = 'none';
+
+        const ctx = canvas.getContext('2d');
+        const W = canvas.width;
+        const H = canvas.height;
+        ctx.clearRect(0, 0, W, H);
+
+        const isDark = document.body.classList.contains('dark-mode');
+        const textColor = isDark ? '#bcaaa4' : '#8d6e63';
+        const lineColor = '#ff8a65';
+        const pointColor = '#ff8a65';
+        const fillStart = 'rgba(255,138,101,0.18)';
+        const fillEnd = 'rgba(255,138,101,0)';
+        const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(141,110,99,0.1)';
+
+        const PAD = { top: 20, right: 16, bottom: 40, left: 44 };
+        const chartW = W - PAD.left - PAD.right;
+        const chartH = H - PAD.top - PAD.bottom;
+
+        const weights = data.map(d => d.weight);
+        const minW = Math.min(...weights) - 1;
+        const maxW = Math.max(...weights) + 1;
+        const range = maxW - minW || 1;
+
+        const xStep = chartW / (data.length - 1);
+        const toX = i => PAD.left + i * xStep;
+        const toY = w => PAD.top + chartH - ((w - minW) / range) * chartH;
+
+        // Grid lines (horizontal)
+        ctx.strokeStyle = gridColor;
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 4]);
+        for (let i = 0; i <= 4; i++) {
+            const y = PAD.top + (chartH / 4) * i;
+            ctx.beginPath();
+            ctx.moveTo(PAD.left, y);
+            ctx.lineTo(PAD.left + chartW, y);
+            ctx.stroke();
+        }
+        ctx.setLineDash([]);
+
+        // Y axis labels
+        ctx.fillStyle = textColor;
+        ctx.font = '10px Outfit, sans-serif';
+        ctx.textAlign = 'right';
+        for (let i = 0; i <= 4; i++) {
+            const val = maxW - (range / 4) * i;
+            const y = PAD.top + (chartH / 4) * i;
+            ctx.fillText(val.toFixed(1), PAD.left - 5, y + 4);
+        }
+
+        // Gradient fill below line
+        const grad = ctx.createLinearGradient(0, PAD.top, 0, PAD.top + chartH);
+        grad.addColorStop(0, fillStart);
+        grad.addColorStop(1, fillEnd);
+
+        ctx.beginPath();
+        ctx.moveTo(toX(0), toY(data[0].weight));
+        for (let i = 1; i < data.length; i++) {
+            const xc = (toX(i - 1) + toX(i)) / 2;
+            const yc = (toY(data[i - 1].weight) + toY(data[i].weight)) / 2;
+            ctx.quadraticCurveTo(toX(i - 1), toY(data[i - 1].weight), xc, yc);
+        }
+        ctx.lineTo(toX(data.length - 1), toY(data[data.length - 1].weight));
+        ctx.lineTo(toX(data.length - 1), PAD.top + chartH);
+        ctx.lineTo(toX(0), PAD.top + chartH);
+        ctx.closePath();
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        // Line
+        ctx.beginPath();
+        ctx.strokeStyle = lineColor;
+        ctx.lineWidth = 2.5;
+        ctx.lineJoin = 'round';
+        ctx.moveTo(toX(0), toY(data[0].weight));
+        for (let i = 1; i < data.length; i++) {
+            const xc = (toX(i - 1) + toX(i)) / 2;
+            const yc = (toY(data[i - 1].weight) + toY(data[i].weight)) / 2;
+            ctx.quadraticCurveTo(toX(i - 1), toY(data[i - 1].weight), xc, yc);
+        }
+        ctx.lineTo(toX(data.length - 1), toY(data[data.length - 1].weight));
+        ctx.stroke();
+
+        // Data points
+        data.forEach((d, i) => {
+            ctx.beginPath();
+            ctx.arc(toX(i), toY(d.weight), 4, 0, Math.PI * 2);
+            ctx.fillStyle = pointColor;
+            ctx.fill();
+            ctx.strokeStyle = isDark ? '#3e322f' : 'white';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        });
+
+        // X axis labels (show dates, every nth if too many)
+        const step = data.length <= 7 ? 1 : Math.ceil(data.length / 7);
+        ctx.fillStyle = textColor;
+        ctx.font = '9px Outfit, sans-serif';
+        ctx.textAlign = 'center';
+        data.forEach((d, i) => {
+            if (i % step === 0 || i === data.length - 1) {
+                const parts = d.date.split('-');
+                const label = `${parts[2]}/${parts[1]}`; // DD/MM
+                ctx.fillText(label, toX(i), H - PAD.bottom + 16);
+            }
+        });
     }
 }
 

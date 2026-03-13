@@ -643,3 +643,196 @@ body.dark-mode .bottom-nav {
 body.dark-mode .craving-card {
     background: linear-gradient(135deg, rgba(255, 138, 101, 0.1), rgba(255, 138, 101, 0.2));
 }
+
+/* ==========================================================================
+   Meal Tabs (Feature #2 - Manual Meal Selector)
+   ========================================================================== */
+.meal-tabs {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding: 0.75rem 0 0.5rem;
+    margin-bottom: 0.75rem;
+    /* Hide scrollbar */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.meal-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.meal-tab {
+    flex-shrink: 0;
+    padding: 0.35rem 0.9rem;
+    border-radius: var(--radius-full);
+    border: 1.5px solid var(--secondary-light);
+    background: var(--surface);
+    color: var(--text-muted);
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.meal-tab:active {
+    transform: scale(0.95);
+}
+
+.meal-tab.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+    box-shadow: 0 4px 12px rgba(255, 138, 101, 0.35);
+}
+
+body.dark-mode .meal-tab {
+    background: var(--surface);
+    border-color: var(--glass-border);
+}
+
+body.dark-mode .meal-tab.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+/* ==========================================================================
+   Weight Tracker (Feature #3)
+   ========================================================================== */
+#weight-tracker-card h3 {
+    font-size: 1rem;
+    margin-bottom: 0.2rem;
+}
+
+.weight-input-row {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+}
+
+.weight-input-wrap {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.weight-input-wrap input {
+    width: 100%;
+    padding: 0.75rem 2.5rem 0.75rem 1rem;
+    border-radius: var(--radius-full);
+    border: 1.5px solid var(--secondary-light);
+    background: var(--surface);
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-main);
+    transition: border-color 0.2s;
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.weight-input-wrap input::-webkit-outer-spin-button,
+.weight-input-wrap input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+}
+
+.weight-input-wrap input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.weight-unit {
+    position: absolute;
+    right: 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.btn-register-weight {
+    flex-shrink: 0;
+    padding: 0.75rem 1.2rem;
+    border-radius: var(--radius-full);
+    border: none;
+    background: var(--primary);
+    color: white;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    box-shadow: 0 4px 12px rgba(255, 138, 101, 0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-register-weight:active {
+    transform: scale(0.95);
+    box-shadow: none;
+}
+
+.weight-summary {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 1rem;
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    margin-top: 0.75rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.weight-summary .weight-current {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.weight-summary .weight-unit-label {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-left: -0.3rem;
+}
+
+.weight-badge {
+    margin-left: auto;
+    padding: 0.3rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.weight-badge.down {
+    background: rgba(129, 199, 132, 0.2);
+    color: #43a047;
+}
+
+.weight-badge.up {
+    background: rgba(255, 183, 77, 0.2);
+    color: #e65100;
+}
+
+.weight-badge.same {
+    background: rgba(141, 110, 99, 0.1);
+    color: var(--text-muted);
+}
+
+.weight-chart-wrap {
+    position: relative;
+    width: 100%;
+}
+
+.weight-chart-wrap canvas {
+    width: 100% !important;
+    height: auto;
+    border-radius: var(--radius-sm);
+}
+
+.hidden {
+    display: none !important;
+}

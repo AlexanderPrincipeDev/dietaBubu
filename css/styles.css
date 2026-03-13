@@ -92,11 +92,10 @@ body {
 .app-container {
     width: 100%;
     max-width: var(--max-width);
-    background-color: var(--bg-color);
+    height: 100dvh; /* Use dynamic viewport height for mobile */
+    overflow: hidden;
     position: relative;
-    min-height: 100vh;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
-    /* Only visible on desktop */
     display: flex;
     flex-direction: column;
 }
@@ -127,7 +126,8 @@ body {
     box-shadow: var(--shadow-md);
     padding: var(--space-2);
     /* Reduced from space-3 to save vertical height */
-    overflow: hidden;
+    /* overflow: hidden; */
+    overflow: visible !important;
 }
 
 /* Header */
@@ -136,10 +136,8 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    background: linear-gradient(to bottom, var(--bg-color) 80%, transparent);
+    background: var(--bg-color);
+    flex-shrink: 0; /* Don't shrink header */
 }
 
 .greeting p:first-child {
@@ -201,15 +199,30 @@ body {
 }
 
 /* Meal Suggester Card */
+.meal-suggester {
+    overflow: visible !important;
+    backdrop-filter: none !important; /* Fixing sticky conflict */
+    -webkit-backdrop-filter: none !important;
+}
+
 .meal-suggester .card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: var(--space-2);
-    /* Reduced from space-3 */
     padding-bottom: 0.5rem;
-    /* Reduced from space-1 */
     border-bottom: 1px dashed var(--secondary-light);
+    
+    /* Sticky Header Logic - FORCED */
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 100 !important;
+    background: var(--surface) !important; /* Solid background for sticky */
+    margin: -1rem -1rem 0.5rem -1rem !important;
+    padding: 1rem 1rem 0.5rem 1rem !important;
+    border-top-left-radius: var(--radius-md);
+    border-top-right-radius: var(--radius-md);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08) !important;
 }
 
 .meal-suggester h2 {

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dieta-bubu-v2';
+const CACHE_NAME = 'dieta-bubu-v4';
 const ASSETS_TO_CACHE = [
     '/',
     '/index.html',
@@ -15,6 +15,7 @@ self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then((cache) => cache.addAll(ASSETS_TO_CACHE))
+            .then(() => self.skipWaiting())
     );
 });
 
@@ -29,16 +30,27 @@ self.addEventListener('activate', (event) => {
                     }
                 })
             );
-        })
+        }).then(() => self.clients.claim())
     );
 });
 
 self.addEventListener('fetch', (event) => {
+    // Estrategia: Network First (para asegurar cambios recientes en desarrollo)
     event.respondWith(
-        caches.match(event.request)
+        fetch(event.request)
             .then((response) => {
-                // Devuelve del caché si está disponible, si no, hace el fetch a la red
-                return response || fetch(event.request);
+                // Si la red responde, clonamos y guardamos en caché
+                if (response && response.status === 200) {
+                    const responseClone = response.clone();
+                    caches.open(CACHE_NAME).then((cache) => {
+                        cache.put(event.request, responseClone);
+                    });
+                }
+                return response;
+            })
+            .catch(() => {
+                // Si la red falla, buscamos en el caché
+                return caches.match(event.request);
             })
     );
 });

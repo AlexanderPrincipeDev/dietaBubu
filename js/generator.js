@@ -36,6 +36,11 @@ class DietGenerator {
             const { categoria, cantidad } = porcion;
             const availableOptions = this.data.alimentos[categoria];
 
+            if (!availableOptions) {
+                console.warn(`Categoría no encontrada: ${categoria}`);
+                return;
+            }
+
             // Elegir N items de forma aleatoria (sin repetir en la misma comida si es posible)
             let selectedItems = [];
             let tempOptions = [...availableOptions]; // Clonamos para no editar el original
@@ -80,7 +85,8 @@ class DietGenerator {
             mealId,
             mealName: this.formatMealName(mealId),
             subtitle: mealDef.horaAprox,
-            items: generatedMenu
+            items: generatedMenu,
+            porcionesDef: mealDef.porciones // Agregamos la definicion original de porciones
         };
     }
 
@@ -170,9 +176,19 @@ class DietGenerator {
             }
 
             let formattedCat = match.categoria.toUpperCase();
-            if (formattedCat === 'CEREALES_CENA') {
-                formattedCat = 'CEREALES (CENA)';
-            }
+            // Human-readable category names
+            const catNames = {
+                'CEREALES_DESAYUNO': 'CEREALES (DESAYUNO / MEDIA TARDE)',
+                'CEREALES_ALMUERZO': 'CEREALES (ALMUERZO / CENA)',
+                'CEREALES_CENA':     'CEREALES (CENA)',
+                'FRUTA_CUBOS':       'FRUTA EN CUBOS (DESAYUNO)',
+                'FRUTA_MEDIANA':     'FRUTA MEDIANA (MEDIA MAÑANA)',
+                'GRASAS_SNACK':      'GRASAS (SNACK — FRUTOS SECOS)',
+                'GRASAS_ALMUERZO':   'GRASAS (ALMUERZO / CENA)',
+                'CARNE_ALMUERZO':    'PROTEÍNA (ALMUERZO)',
+                'CARNE_CENA':        'PROTEÍNA (CENA)'
+            };
+            formattedCat = catNames[formattedCat] || formattedCat;
 
             results.push({
                 isWarning: false,

@@ -177,13 +177,17 @@ class DietaApp {
                 // Animate + re-render
                 const container = document.getElementById('meal-portions-container');
                 container.style.opacity = '0';
-                container.style.transform = 'translateY(8px)';
-                setTimeout(() => {
-                    this.renderMenu();
+                container.style.transition = 'none';
+                
+                // Render immediately
+                this.renderMenu();
+                
+                // Fade in
+                requestAnimationFrame(() => {
                     container.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
                     container.style.opacity = '1';
                     container.style.transform = 'none';
-                }, 200);
+                });
             });
         });
     }
@@ -215,12 +219,36 @@ class DietaApp {
             groupDiv.className = 'category-group mt-3';
 
             // Titulo de la categoria
-            let catTitle = categoria.toUpperCase();
-            if (catTitle === 'CEREALES_CENA') catTitle = 'CEREALES (CENA)';
+            const catTitles = {
+                'LACTEOS':           'Lácteos',
+                'HUEVOS':            'Huevos',
+                'CEREALES_DESAYUNO': 'Cereales',
+                'CEREALES_ALMUERZO': 'Cereales',
+                'CEREALES_CENA':     'Cereales',
+                'CEREALES':          'Cereales',
+                'FRUTA_CUBOS':       'Fruta',
+                'FRUTA_MEDIANA':     'Fruta',
+                'FRUTA':             'Fruta',
+                'GRASAS_SNACK':      'Grasas (Frutos Secos)',
+                'GRASAS_ALMUERZO':   'Grasas',
+                'GRASAS_CENA':       'Grasas',
+                'GRASAS':            'Grasas',
+                'VERDURAS':          'Verduras',
+                'CARNE_ALMUERZO':    'Proteína',
+                'CARNE_CENA':        'Proteína',
+                'CARNE':             'Proteína'
+            };
+
+            let catTitle = catTitles[categoria.toUpperCase()] || categoria.toUpperCase();
+
+            // Buscar el numero de porciones en la definicion
+            const porcionDef = menuData.porcionesDef.find(p => p.categoria === categoria);
+            const numPorciones = porcionDef ? porcionDef.cantidad : 1;
+            const portionText = numPorciones > 1 ? ` (${numPorciones} porciones)` : ` (${numPorciones} porción)`;
 
             const titleEl = document.createElement('h3');
             titleEl.className = 'category-title';
-            titleEl.textContent = catTitle;
+            titleEl.textContent = `${catTitle}${portionText}`;
             groupDiv.appendChild(titleEl);
 
             // Renderizar los items de esta categoria
@@ -229,14 +257,23 @@ class DietaApp {
                 el.className = 'portion-item section-anim';
 
                 const iconMap = {
-                    'lacteos': '🥛',
-                    'huevos': '🥚',
-                    'cereales': '🌾',
-                    'cereales_cena': '🥔',
-                    'fruta': '🍎',
-                    'grasas': '🥑',
-                    'verduras': '🥗',
-                    'carne': '🥩'
+                    'lacteos':           '🥛',
+                    'huevos':            '🥚',
+                    'cereales':          '🌾',
+                    'cereales_desayuno': '🌾',
+                    'cereales_almuerzo': '🥔',
+                    'cereales_cena':     '🥔',
+                    'fruta':             '🍎',
+                    'fruta_cubos':       '🍎',
+                    'fruta_mediana':     '🍊',
+                    'grasas':            '🥑',
+                    'grasas_snack':      '🥜',
+                    'grasas_almuerzo':   '🥑',
+                    'grasas_cena':       '🥑',
+                    'verduras':          '🥗',
+                    'carne':             '🥩',
+                    'carne_almuerzo':    '🥩',
+                    'carne_cena':        '🍗'
                 };
 
                 const isLockedBtn = item.isLocked ? 'locked' : '';

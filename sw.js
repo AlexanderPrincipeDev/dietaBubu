@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dieta-bubu-v1';
+const CACHE_NAME = 'dieta-bubu-v2';
 const ASSETS_TO_CACHE = [
     '/',
     '/index.html',
@@ -15,6 +15,21 @@ self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then((cache) => cache.addAll(ASSETS_TO_CACHE))
+    );
+});
+
+self.addEventListener('activate', (event) => {
+    const cacheAllowlist = [CACHE_NAME];
+    event.waitUntil(
+        caches.keys().then((cacheNames) => {
+            return Promise.all(
+                cacheNames.map((cacheName) => {
+                    if (cacheAllowlist.indexOf(cacheName) === -1) {
+                        return caches.delete(cacheName);
+                    }
+                })
+            );
+        })
     );
 });
 

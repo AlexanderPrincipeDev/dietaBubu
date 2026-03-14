@@ -15,6 +15,7 @@ class DietaApp {
 
         // Aplicar Dark Mode inicial
         if (this.isDarkMode) document.body.classList.add('dark-mode');
+        this.syncThemeColor();
 
         // Inicialización
         this.init();
@@ -31,6 +32,7 @@ class DietaApp {
         this.setupWeightTracker();
         this.setupSearch();
         this.setupAlerts();
+        this.applyInitialViewFromUrl();
         this.initPWAInstall();
     }
 
@@ -63,6 +65,7 @@ class DietaApp {
             this.isDarkMode = !this.isDarkMode;
             localStorage.setItem('isDarkMode', this.isDarkMode);
             document.body.classList.toggle('dark-mode');
+            this.syncThemeColor();
 
             // Toggle Icon
             icon.className = this.isDarkMode ? 'ti ti-sun' : 'ti ti-moon';
@@ -77,28 +80,46 @@ class DietaApp {
     setupNavigation() {
         const navItems = document.querySelectorAll('.nav-item');
         navItems.forEach(item => {
-            item.addEventListener('click', (e) => {
-                // Remover active class de boton
-                navItems.forEach(btn => btn.classList.remove('active'));
-
-                // Añadir active class
-                const btn = e.currentTarget;
-                btn.classList.add('active');
-
-                // Ocultar todas las views
-                const views = document.querySelectorAll('.view');
-                views.forEach(v => v.classList.remove('active'));
-                setTimeout(() => views.forEach(v => {
-                    if (!v.classList.contains('active')) v.classList.add('hidden');
-                }), 400); // Wait fadeout
-
-                // Mostrar la vista objetivo
-                const targetId = btn.getAttribute('data-target');
-                const targetView = document.getElementById(targetId);
-                targetView.classList.remove('hidden');
-                setTimeout(() => targetView.classList.add('active'), 10);
-            });
+            item.addEventListener('click', (e) => this.activateView(e.currentTarget.getAttribute('data-target')));
         });
+    }
+
+    activateView(targetId) {
+        if (!targetId) return;
+
+        const navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach((btn) => btn.classList.toggle('active', btn.getAttribute('data-target') === targetId));
+
+        const views = document.querySelectorAll('.view');
+        views.forEach((view) => view.classList.remove('active'));
+        window.setTimeout(() => {
+            views.forEach((view) => {
+                if (!view.classList.contains('active')) view.classList.add('hidden');
+            });
+        }, 400);
+
+        const targetView = document.getElementById(targetId);
+        if (!targetView) return;
+
+        targetView.classList.remove('hidden');
+        window.setTimeout(() => targetView.classList.add('active'), 10);
+    }
+
+    applyInitialViewFromUrl() {
+        const params = new URL(window.location.href).searchParams;
+        const requestedView = params.get('view');
+        const validViews = new Set(['view-home', 'view-tracker', 'view-search', 'view-alerts']);
+
+        if (validViews.has(requestedView)) {
+            this.activateView(requestedView);
+        }
+    }
+
+    syncThemeColor() {
+        const themeColorMeta = document.getElementById('theme-color-meta');
+        if (!themeColorMeta) return;
+
+        themeColorMeta.setAttribute('content', this.isDarkMode ? '#3e322f' : '#ff8a65');
     }
 
     /* --- HEADER (Saludo dinamico) --- */
@@ -806,40 +827,111 @@ class DietaApp {
     initPWAInstall() {
         const installContainer = document.getElementById('install-container');
         const btnInstall = document.getElementById('btn-install-pwa');
+        const installHomeBanner = document.getElementById('install-home-banner');
+        const btnInstallHome = document.getElementById('btn-install-home');
+        const installDescription = installContainer ? installContainer.querySelector('p') : null;
+        const homeBannerText = installHomeBanner ? installHomeBanner.querySelector('.banner-text p') : null;
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+            || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+            || window.navigator.standalone === true;
+        const isMobileViewport = window.matchMedia('(max-width: 900px)').matches;
 
-        window.addEventListener('beforeinstallprompt', (e) => {
-            // Prevenir que el navegador muestre el prompt automático
-            e.preventDefault();
-            // Guardar el evento para dispararlo luego
-            this.deferredPrompt = e;
-            // Mostrar nuestro botón de instalación
+        const showInstallUI = ({
+            homeText,
+            detailText,
+            buttonLabel = 'Instalar',
+            buttonDisabled = false,
+            showButton = true
+        }) => {
             if (installContainer) installContainer.classList.remove('hidden');
-        });
+            if (installHomeBanner) installHomeBanner.classList.remove('hidden');
+            if (homeBannerText) homeBannerText.textContent = homeText;
+            if (installDescription) installDescription.textContent = detailText;
 
-        if (btnInstall) {
-            btnInstall.addEventListener('click', async () => {
-                if (!this.deferredPrompt) return;
-                
-                // Mostrar el prompt de instalación
-                this.deferredPrompt.prompt();
-                
-                // Esperar la respuesta del usuario
-                const { outcome } = await this.deferredPrompt.userChoice;
-                console.log(`User response to the install prompt: ${outcome}`);
-                
-                // Limpiar el prompt diferido
-                this.deferredPrompt = null;
-                
-                // Ocultar el botón
-                if (installContainer) installContainer.classList.add('hidden');
+            [btnInstall, btnInstallHome].forEach((button) => {
+                if (!button) return;
+                button.textContent = buttonLabel;
+                button.disabled = buttonDisabled;
+                button.style.display = showButton ? '' : 'none';
             });
+        };
+
+        const hideInstallUI = () => {
+            if (installContainer) installContainer.classList.add('hidden');
+            if (installHomeBanner) installHomeBanner.classList.add('hidden');
+        };
+
+        if (isStandalone || !isMobileViewport) {
+            hideInstallUI();
+            return;
         }
 
-        window.addEventListener('appinstalled', () => {
-            // Ocultar el botón si ya se instaló
-            if (installContainer) installContainer.classList.add('hidden');
+        if (isIOS) {
+            showInstallUI({
+                homeText: 'Toca "Compartir" y luego "Añadir a pantalla de inicio" 📲',
+                detailText: 'En iPhone la instalación se hace desde el menú Compartir de Safari.',
+                showButton: false
+            });
+            return;
+        }
+
+        showInstallUI({
+            homeText: 'Preparando instalación...',
+            detailText: 'Cuando el navegador habilite la instalación, verás el botón listo.',
+            buttonLabel: 'Preparando...',
+            buttonDisabled: true
+        });
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            this.deferredPrompt = e;
+            showInstallUI({
+                homeText: 'Acceso rápido y sin internet',
+                detailText: 'Instala la app para abrirla desde la pantalla principal.',
+                buttonLabel: 'Instalar',
+                buttonDisabled: false
+            });
+        });
+
+        const fallbackInstallTimer = window.setTimeout(() => {
+            if (!this.deferredPrompt) {
+                showInstallUI({
+                    homeText: 'Si es tu primera visita, actualiza una vez',
+                    detailText: 'Luego puedes instalar desde el menú del navegador como "Instalar aplicación" si no aparece el aviso.',
+                    showButton: false
+                });
+            }
+        }, 3500);
+
+        const handleInstallClick = async () => {
+            if (!this.deferredPrompt) return;
+
+            window.clearTimeout(fallbackInstallTimer);
+            this.deferredPrompt.prompt();
+            const { outcome } = await this.deferredPrompt.userChoice;
             this.deferredPrompt = null;
-            console.log('PWA was installed');
+
+            if (outcome === 'accepted') {
+                hideInstallUI();
+                return;
+            }
+
+            showInstallUI({
+                homeText: 'Puedes instalarla más tarde desde el menú',
+                detailText: 'Si cambias de idea, abre el menú del navegador y busca "Instalar aplicación".',
+                buttonLabel: 'Instalación pendiente',
+                buttonDisabled: true
+            });
+        };
+
+        if (btnInstall) btnInstall.addEventListener('click', handleInstallClick);
+        if (btnInstallHome) btnInstallHome.addEventListener('click', handleInstallClick);
+
+        window.addEventListener('appinstalled', () => {
+            window.clearTimeout(fallbackInstallTimer);
+            hideInstallUI();
+            this.deferredPrompt = null;
         });
     }
 }

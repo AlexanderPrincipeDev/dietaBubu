@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+<title id="title">Avatar de Evelyn</title>
+<desc id="desc">Avatar ilustrado con fondo cálido y la inicial E.</desc>
+<defs>
+<linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+<stop offset="0%" stop-color="#ffe3d1"/>
+<stop offset="100%" stop-color="#ffc1a6"/>
+</linearGradient>
+</defs>
+<rect width="128" height="128" rx="64" fill="url(#bg)"/>
+<circle cx="64" cy="50" r="22" fill="#ffffff" fill-opacity="0.78"/>
+<path d="M28 108c6-22 22-34 36-34s30 12 36 34" fill="#fff4ed"/>
+<text x="64" y="58" text-anchor="middle" font-family="Outfit, Arial, sans-serif" font-size="28" font-weight="700" fill="#ff8a65">E</text>
+</svg>

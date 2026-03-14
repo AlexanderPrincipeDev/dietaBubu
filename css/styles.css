@@ -86,13 +86,16 @@ body {
     justify-content: center;
     /* Center on desktop */
     min-height: 100vh;
+    min-height: 100dvh;
 }
 
 /* App Container (Constrains width on desktop, full width on mobile) */
 .app-container {
     width: 100%;
     max-width: var(--max-width);
-    height: 100dvh; /* Use dynamic viewport height for mobile */
+    min-height: 100vh;
+    min-height: 100dvh;
+    height: 100dvh;
     overflow: hidden;
     position: relative;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
@@ -107,6 +110,10 @@ body {
 
 .mt-4 {
     margin-top: var(--space-4);
+}
+
+.mb-4 {
+    margin-bottom: var(--space-4);
 }
 
 .text-center {
@@ -132,7 +139,7 @@ body {
 
 /* Header */
 .main-header {
-    padding: var(--space-4) var(--space-3) var(--space-2);
+    padding: calc(var(--space-4) + env(safe-area-inset-top)) var(--space-3) var(--space-2);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -172,7 +179,7 @@ body {
 /* Main Content Area */
 .content-wrapper {
     flex: 1;
-    padding: 0 var(--space-3) calc(var(--nav-height) + var(--space-3));
+    padding: 0 var(--space-3) calc(var(--nav-height) + var(--space-3) + env(safe-area-inset-bottom));
     overflow-y: auto;
 }
 
@@ -366,7 +373,8 @@ body.dark-mode .btn-whatsapp {
     bottom: 0;
     width: 100%;
     max-width: var(--max-width);
-    height: var(--nav-height);
+    height: calc(var(--nav-height) + env(safe-area-inset-bottom));
+    padding-bottom: env(safe-area-inset-bottom);
     background: var(--surface);
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
     display: flex;
@@ -858,6 +866,110 @@ body.dark-mode .meal-tab.active {
     width: 100% !important;
     height: auto;
     border-radius: var(--radius-sm);
+}
+
+/* ==========================================================================
+   Installation Banner (Home View)
+   ========================================================================== */
+.install-banner {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    border-radius: var(--radius-md);
+    padding: var(--space-2) var(--space-3);
+    margin-bottom: var(--space-3);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 8px 20px rgba(255, 138, 101, 0.25);
+    color: white;
+    animation: slideInDown 0.5s ease-out;
+}
+
+.banner-content {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.banner-icon {
+    font-size: 1.5rem;
+    background: rgba(255, 255, 255, 0.2);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.banner-text h4 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.banner-text p {
+    font-size: 0.75rem;
+    opacity: 0.9;
+    margin: 0;
+}
+
+.btn-banner-install {
+    background: white;
+    color: var(--primary);
+    border: none;
+    padding: 0.5rem 1.2rem;
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
+    font-weight: 700;
+    font-family: 'Outfit', sans-serif;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s;
+}
+
+.btn-banner-install:active {
+    transform: scale(0.9);
+}
+
+.btn-banner-install:disabled,
+#btn-install-pwa:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+}
+
+@media (max-width: 560px) {
+    .install-banner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.9rem;
+    }
+
+    .btn-banner-install {
+        width: 100%;
+    }
+}
+
+@media (display-mode: standalone) {
+    body {
+        background: var(--surface);
+    }
+
+    .app-container {
+        max-width: 100%;
+        box-shadow: none;
+    }
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .hidden {

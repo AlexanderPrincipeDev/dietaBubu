@@ -1,5 +1,7 @@
-const CACHE_NAME = 'dieta-bubu-v5';
-const ASSETS_TO_CACHE = [
+const STATIC_CACHE = 'dieta-bubu-static-v9';
+const RUNTIME_CACHE = 'dieta-bubu-runtime-v9';
+const APP_SHELL = './index.html';
+const SAME_ORIGIN_ASSETS = [
     './',
     './index.html',
     './css/styles.css',
@@ -9,51 +11,103 @@ const ASSETS_TO_CACHE = [
     './manifest.json',
     './icons/icon-192.png',
     './icons/icon-512.png',
-    'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap',
-    'https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css',
-    'https://cdn.jsdelivr.net/npm/canvas-confetti@latest/dist/confetti.browser.min.js'
+    './icons/icon-maskable-512.png',
+    './icons/apple-touch-icon.png',
+    './icons/avatar-evelyn.svg',
+    './vendor/tabler-icons/tabler-icons.min.css',
+    './vendor/tabler-icons/fonts/tabler-icons.eot',
+    './vendor/tabler-icons/fonts/tabler-icons.ttf',
+    './vendor/tabler-icons/fonts/tabler-icons.woff',
+    './vendor/tabler-icons/fonts/tabler-icons.woff2',
+    './vendor/canvas-confetti/confetti.browser.min.js'
 ];
+const RUNTIME_HOSTS = new Set([
+    'fonts.googleapis.com',
+    'fonts.gstatic.com',
+    'cdn.jsdelivr.net'
+]);
 
 self.addEventListener('install', (event) => {
     event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then((cache) => cache.addAll(ASSETS_TO_CACHE))
+        caches.open(STATIC_CACHE)
+            .then((cache) => cache.addAll(SAME_ORIGIN_ASSETS))
             .then(() => self.skipWaiting())
     );
 });
 
 self.addEventListener('activate', (event) => {
-    const cacheAllowlist = [CACHE_NAME];
+    const cacheAllowlist = [STATIC_CACHE, RUNTIME_CACHE];
     event.waitUntil(
-        caches.keys().then((cacheNames) => {
-            return Promise.all(
+        caches.keys()
+            .then((cacheNames) => Promise.all(
                 cacheNames.map((cacheName) => {
-                    if (cacheAllowlist.indexOf(cacheName) === -1) {
+                    if (!cacheAllowlist.includes(cacheName)) {
                         return caches.delete(cacheName);
                     }
+                    return undefined;
                 })
-            );
-        }).then(() => self.clients.claim())
+            ))
+            .then(async () => {
+                if ('navigationPreload' in self.registration) {
+                    await self.registration.navigationPreload.enable();
+                }
+            })
+            .then(() => self.clients.claim())
     );
 });
 
+async function staleWhileRevalidate(request, cacheName) {
+    const cache = await caches.open(cacheName);
+    const cachedResponse = await cache.match(request);
+    const networkPromise = fetch(request)
+        .then((response) => {
+            if (response && response.ok) {
+                cache.put(request, response.clone());
+            }
+            return response;
+        })
+        .catch(() => cachedResponse);
+
+    return cachedResponse || networkPromise;
+}
+
 self.addEventListener('fetch', (event) => {
-    // Estrategia: Network First (para asegurar cambios recientes en desarrollo)
-    event.respondWith(
-        fetch(event.request)
-            .then((response) => {
-                // Si la red responde, clonamos y guardamos en caché
-                if (response && response.status === 200) {
-                    const responseClone = response.clone();
-                    caches.open(CACHE_NAME).then((cache) => {
-                        cache.put(event.request, responseClone);
-                    });
+    if (event.request.method !== 'GET') return;
+
+    const url = new URL(event.request.url);
+
+    if (event.request.mode === 'navigate') {
+        event.respondWith(
+            (async () => {
+                const preloadResponse = await event.preloadResponse;
+                if (preloadResponse) {
+                    return preloadResponse;
                 }
-                return response;
-            })
-            .catch(() => {
-                // Si la red falla, buscamos en el caché
-                return caches.match(event.request);
-            })
-    );
+
+                return fetch(event.request)
+                .then((response) => {
+                    if (response && response.ok) {
+                        const responseClone = response.clone();
+                        caches.open(RUNTIME_CACHE).then((cache) => {
+                            cache.put(event.request, responseClone);
+                        });
+                    }
+                    return response;
+                })
+                .catch(async () => {
+                    return (await caches.match(event.request)) || caches.match(APP_SHELL);
+                });
+            })()
+        );
+        return;
+    }
+
+    if (url.origin === self.location.origin) {
+        event.respondWith(staleWhileRevalidate(event.request, STATIC_CACHE));
+        return;
+    }
+
+    if (RUNTIME_HOSTS.has(url.hostname)) {
+        event.respondWith(staleWhileRevalidate(event.request, RUNTIME_CACHE));
+    }
 });

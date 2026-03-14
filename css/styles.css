@@ -259,6 +259,20 @@ body {
     color: white;
 }
 
+.btn-whatsapp {
+    background: #25D366;
+    color: white;
+}
+
+.btn-whatsapp:active {
+    background: #128C7E;
+    color: white;
+}
+
+body.dark-mode .btn-whatsapp {
+    background: #128C7E;
+}
+
 /* Portions List */
 .portions-list {
     display: flex;

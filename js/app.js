@@ -144,7 +144,70 @@ class DietaApp {
 
         // Renderizar por primera vez
         this.renderMenu();
+
+        this.setupShareWhatsApp();
     }
+
+    /* --- COMPARTIR WHATSAPP --- */
+    setupShareWhatsApp() {
+        const btnShare = document.getElementById('btn-share-whatsapp');
+        if (btnShare) {
+            btnShare.addEventListener('click', () => {
+                this.shareMenu();
+            });
+        }
+    }
+
+    shareMenu() {
+        const menuData = this.generator.generateMenu(this.currentMealId);
+        if (!menuData) return;
+
+        let text = `*${menuData.mealName} - Dieta Bubu* 🤰\n\n`;
+        
+        // 1. Agrupar los items por categoria (reutilizando lógica de render para consistencia)
+        const groupedItems = {};
+        menuData.items.forEach(item => {
+            if (!groupedItems[item.categoria]) {
+                groupedItems[item.categoria] = [];
+            }
+            groupedItems[item.categoria].push(item);
+        });
+
+        const iconMap = {
+            'lacteos':           '🥛',
+            'huevos':            '🥚',
+            'cereales':          '🌾',
+            'cereales_desayuno': '🌾',
+            'cereales_almuerzo': '🥔',
+            'cereales_cena':     '🥔',
+            'fruta':             '🍎',
+            'fruta_cubos':       '🍎',
+            'fruta_mediana':     '🍊',
+            'grasas':            '🥑',
+            'grasas_snack':      '🥜',
+            'grasas_almuerzo':   '🥑',
+            'grasas_cena':       '🥑',
+            'verduras':          '🥗',
+            'carne':             '🥩',
+            'carne_almuerzo':    '🥩',
+            'carne_cena':        '🍗'
+        };
+
+        for (const [categoria, items] of Object.entries(groupedItems)) {
+            const icon = iconMap[categoria] || '•';
+            items.forEach(item => {
+                text += `${icon} ${item.name}\n`;
+            });
+        }
+
+        text += `\n_Generado el ${new Date().toLocaleDateString('es-ES')}_`;
+
+        const encodedText = encodeURIComponent(text);
+        const whatsappUrl = `https://wa.me/?text=${encodedText}`;
+        
+        window.open(whatsappUrl, '_blank');
+    }
+
 
     /* --- SELECTOR MANUAL DE COMIDA (TABS) --- */
     setupMealTabs() {

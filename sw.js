@@ -1,11 +1,14 @@
-const CACHE_NAME = 'dieta-bubu-v4';
+const CACHE_NAME = 'dieta-bubu-v5';
 const ASSETS_TO_CACHE = [
-    '/',
-    '/index.html',
-    '/css/styles.css',
-    '/js/data.js',
-    '/js/generator.js',
-    '/js/app.js',
+    './',
+    './index.html',
+    './css/styles.css',
+    './js/data.js',
+    './js/generator.js',
+    './js/app.js',
+    './manifest.json',
+    './icons/icon-192.png',
+    './icons/icon-512.png',
     'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap',
     'https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css',
     'https://cdn.jsdelivr.net/npm/canvas-confetti@latest/dist/confetti.browser.min.js'

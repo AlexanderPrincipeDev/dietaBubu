@@ -4,20 +4,27 @@
   "description": "Tu asistente nutricional personal para el embarazo.",
   "start_url": "./index.html",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#fdfbf7",
   "theme_color": "#ff8a65",
   "icons": [
     {
-      "src": "https://api.dicebear.com/7.x/notionists/svg?seed=Evelyn",
+      "src": "icons/icon-192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "https://api.dicebear.com/7.x/notionists/svg?seed=Evelyn",
+      "src": "icons/icon-512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }

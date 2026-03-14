@@ -11,6 +11,7 @@ class DietaApp {
         this.lastCheckDate = localStorage.getItem('lastCheckDate');
         this.isDarkMode = localStorage.getItem('isDarkMode') === 'true';
         this.weightLog = JSON.parse(localStorage.getItem('weightLog')) || [];
+        this.deferredPrompt = null;
 
         // Aplicar Dark Mode inicial
         if (this.isDarkMode) document.body.classList.add('dark-mode');
@@ -30,6 +31,7 @@ class DietaApp {
         this.setupWeightTracker();
         this.setupSearch();
         this.setupAlerts();
+        this.initPWAInstall();
     }
 
     /**
@@ -798,6 +800,46 @@ class DietaApp {
                 const label = `${parts[2]}/${parts[1]}`; // DD/MM
                 ctx.fillText(label, toX(i), H - PAD.bottom + 16);
             }
+        });
+    }
+    /* --- PWA INSTALLATION --- */
+    initPWAInstall() {
+        const installContainer = document.getElementById('install-container');
+        const btnInstall = document.getElementById('btn-install-pwa');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevenir que el navegador muestre el prompt automático
+            e.preventDefault();
+            // Guardar el evento para dispararlo luego
+            this.deferredPrompt = e;
+            // Mostrar nuestro botón de instalación
+            if (installContainer) installContainer.classList.remove('hidden');
+        });
+
+        if (btnInstall) {
+            btnInstall.addEventListener('click', async () => {
+                if (!this.deferredPrompt) return;
+                
+                // Mostrar el prompt de instalación
+                this.deferredPrompt.prompt();
+                
+                // Esperar la respuesta del usuario
+                const { outcome } = await this.deferredPrompt.userChoice;
+                console.log(`User response to the install prompt: ${outcome}`);
+                
+                // Limpiar el prompt diferido
+                this.deferredPrompt = null;
+                
+                // Ocultar el botón
+                if (installContainer) installContainer.classList.add('hidden');
+            });
+        }
+
+        window.addEventListener('appinstalled', () => {
+            // Ocultar el botón si ya se instaló
+            if (installContainer) installContainer.classList.add('hidden');
+            this.deferredPrompt = null;
+            console.log('PWA was installed');
         });
     }
 }

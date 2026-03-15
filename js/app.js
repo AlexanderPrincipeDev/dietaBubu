@@ -26,6 +26,14 @@ class DietaApp {
     init() {
         this.checkNewDay();
         this.setupDarkMode();
+        
+        // Inicialización prioritaria de lista de compras para evitar errores de carga
+        try {
+            this.setupShoppingList();
+        } catch (e) {
+            console.error("Error al inicializar lista de compras:", e);
+        }
+
         this.setupNavigation();
         this.setupHeader();
         this.setupGenerator();
@@ -34,7 +42,6 @@ class DietaApp {
         this.setupWeightTracker();
         this.setupSearch();
         this.setupAlerts();
-        this.setupShoppingList();
         this.applyInitialViewFromUrl();
         this.initPWAInstall();
     }
@@ -828,12 +835,10 @@ class DietaApp {
     }
     /* --- LISTA DE COMPRAS --- */
     setupShoppingList() {
-        // Asegurarse de que la lista maestra esté cargada
-        if (this.shoppingList.length === 0) {
-            this.shoppingList = this.generator.getAllShoppingList();
-            localStorage.setItem('shoppingList', JSON.stringify(this.shoppingList));
-        }
-
+        // Siempre cargar la lista maestra desde el generador para asegurar datos frescos
+        // Esto evita depender de un localStorage potencialmente antiguo/corrupto para la estructura
+        this.shoppingList = this.generator.getAllShoppingList();
+        
         // Definición de grupos unificados
         this.cartCategoryMapping = {
             'lacteos':           'Lácteos',

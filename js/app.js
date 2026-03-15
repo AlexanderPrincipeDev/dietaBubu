@@ -834,8 +834,30 @@ class DietaApp {
             localStorage.setItem('shoppingList', JSON.stringify(this.shoppingList));
         }
 
-        // Categoría activa inicial
-        this.activeCartCategory = this.shoppingList.length > 0 ? this.shoppingList[0].categoria : null;
+        // Definición de grupos unificados
+        this.cartCategoryMapping = {
+            'lacteos':           'Lácteos',
+            'huevos':            'Huevos',
+            'cereales_desayuno': 'Cereales',
+            'cereales_almuerzo': 'Cereales',
+            'cereales_cena':     'Cereales',
+            'fruta_cubos':       'Frutas',
+            'fruta_mediana':     'Frutas',
+            'grasas_snack':      'Grasas',
+            'grasas_almuerzo':   'Grasas',
+            'grasas_cena':       'Grasas',
+            'verduras':          'Verduras',
+            'carne_almuerzo':    'Proteínas',
+            'carne_cena':        'Proteínas'
+        };
+
+        // Grupos únicos para los Tabs
+        this.unifiedCategories = [...new Set(Object.values(this.cartCategoryMapping))];
+
+        // Categoría activa inicial (usando el nombre unificado)
+        if (!this.activeCartCategory || !this.unifiedCategories.includes(this.activeCartCategory)) {
+            this.activeCartCategory = this.unifiedCategories[0];
+        }
 
         this.renderCartTabs();
         this.renderShoppingList();
@@ -845,32 +867,14 @@ class DietaApp {
         const tabsContainer = document.getElementById('cart-tabs');
         if (!tabsContainer) return;
 
-        // Obtener categorías únicas
-        const categories = [...new Set(this.shoppingList.map(item => item.categoria))];
-        
-        const catTitles = {
-            'lacteos':           'Lácteos',
-            'huevos':            'Huevos',
-            'cereales_desayuno': 'Cereales',
-            'cereales_almuerzo': 'Tubérculos',
-            'fruta_cubos':       'Frutas Picadas',
-            'fruta_mediana':     'Frutas Enteras',
-            'grasas_snack':      'Secos',
-            'grasas_almuerzo':   'Grasas',
-            'grasas_cena':       'Grasas',
-            'verduras':          'Verduras',
-            'carne_almuerzo':    'Proteínas',
-            'carne_cena':        'Proteínas'
-        };
-
         tabsContainer.innerHTML = '';
-        categories.forEach(cat => {
+        this.unifiedCategories.forEach(catName => {
             const pill = document.createElement('button');
-            pill.className = `meal-tab ${this.activeCartCategory === cat ? 'active' : ''}`;
-            pill.textContent = catTitles[cat] || cat.toUpperCase();
+            pill.className = `meal-tab ${this.activeCartCategory === catName ? 'active' : ''}`;
+            pill.textContent = catName;
             
             pill.addEventListener('click', () => {
-                this.activeCartCategory = cat;
+                this.activeCartCategory = catName;
                 this.renderCartTabs();
                 this.renderShoppingList();
             });
@@ -893,25 +897,22 @@ class DietaApp {
 
         container.innerHTML = '';
         
-        // Filtrar por categoría activa
-        const filteredItems = this.shoppingList.filter(item => item.categoria === this.activeCartCategory);
+        // Filtrar por nombre de categoría unificado
+        const filteredItems = this.shoppingList.filter(item => 
+            this.cartCategoryMapping[item.categoria] === this.activeCartCategory
+        );
 
         const iconMap = {
             'lacteos':           '🥛',
             'huevos':            '🥚',
-            'cereales':          '🌾',
             'cereales_desayuno': '🌾',
             'cereales_almuerzo': '🥔',
-            'cereales_cena':     '🥔',
-            'fruta':             '🍎',
             'fruta_cubos':       '🍎',
             'fruta_mediana':     '🍊',
-            'grasas':            '🥑',
             'grasas_snack':      '🥜',
             'grasas_almuerzo':   '🥑',
             'grasas_cena':       '🥑',
             'verduras':          '🥗',
-            'carne':             '🥩',
             'carne_almuerzo':    '🥩',
             'carne_cena':        '🍗'
         };

@@ -211,6 +211,25 @@
                 </div>
             </section>
 
+            <!-- VIEW: SHOPPING LIST (CART) -->
+            <section id="view-cart" class="view hidden">
+                <div class="page-title">
+                    <h2>Lista Maestra</h2>
+                    <p>Filtra por tipo de alimento 🛒</p>
+                </div>
+
+                <!-- Category Pills (Tabs) for Shopping List -->
+                <div id="cart-tabs" class="meal-tabs mb-3">
+                    <!-- Category pills will be injected here -->
+                    <div class="skeleton-loader" style="width: 100%; height: 40px;"></div>
+                </div>
+
+                <div id="cart-items-container" class="cart-items-list">
+                    <!-- Shopping items will be injected here -->
+                    <div class="skeleton-loader">Cargando ingredientes...</div>
+                </div>
+            </section>
+
         </main>
 
         <!-- BOTTOM NAVIGATION -->
@@ -226,6 +245,10 @@
             <button class="nav-item" data-target="view-search">
                 <i class="ti ti-search"></i>
                 <span>Buscar</span>
+            </button>
+            <button class="nav-item" data-target="view-cart">
+                <i class="ti ti-shopping-cart"></i>
+                <span>Compras</span>
             </button>
             <button class="nav-item" data-target="view-alerts">
                 <i class="ti ti-info-circle"></i>

@@ -200,4 +200,72 @@ class DietGenerator {
 
         return results;
     }
+
+    /**
+     * Genera un menú completo para todo el día (5 comidas)
+     */
+    generateFullDayMenu() {
+        const meals = ['desayuno', 'media_manana', 'almuerzo', 'media_tarde', 'cena'];
+        const fullDayMenu = {};
+
+        meals.forEach(mealId => {
+            fullDayMenu[mealId] = this.generateMenu(mealId);
+        });
+
+        return fullDayMenu;
+    }
+
+    /**
+     * Agrega ingredientes de un menú completo en una lista de compras simplificada
+     */
+    getShoppingList(fullDayMenu) {
+        const aggregated = {};
+
+        Object.values(fullDayMenu).forEach(meal => {
+            meal.items.forEach(item => {
+                const key = `${item.categoria}|${item.name}`;
+                if (!aggregated[key]) {
+                    aggregated[key] = {
+                        name: item.name,
+                        categoria: item.categoria,
+                        count: 0
+                    };
+                }
+                aggregated[key].count++;
+            });
+        });
+
+        // Convertir a array y ordenar por categoría
+        return Object.values(aggregated).sort((a, b) => a.categoria.localeCompare(b.categoria));
+    }
+
+    /**
+     * Retorna TODOS los alimentos permitidos en la dieta, organizados por categoría.
+     * Esto sirve para una lista de compras "maestra".
+     */
+    getAllShoppingList() {
+        const aggregated = [];
+        
+        // Categorías que queremos incluir en la lista de compras
+        const categories = [
+            'lacteos', 'huevos', 'cereales_desayuno', 'cereales_almuerzo', 
+            'fruta_cubos', 'fruta_mediana', 'grasas_snack', 'grasas_almuerzo', 
+            'grasas_cena', 'verduras', 'carne_almuerzo', 'carne_cena'
+        ];
+
+        categories.forEach(cat => {
+            const options = this.data.alimentos[cat];
+            if (options) {
+                options.forEach(name => {
+                    aggregated.push({
+                        name,
+                        categoria: cat,
+                        count: 1 // No hay conteo, es solo la opción
+                    });
+                });
+            }
+        });
+
+        return aggregated;
+    }
 }

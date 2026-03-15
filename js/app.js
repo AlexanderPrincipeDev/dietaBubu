@@ -11,6 +11,8 @@ class DietaApp {
         this.lastCheckDate = localStorage.getItem('lastCheckDate');
         this.isDarkMode = localStorage.getItem('isDarkMode') === 'true';
         this.weightLog = JSON.parse(localStorage.getItem('weightLog')) || [];
+        this.shoppingList = JSON.parse(localStorage.getItem('shoppingList')) || [];
+        this.purchasedItems = JSON.parse(localStorage.getItem('purchasedItems')) || {}; // { "categoria|nombre": true }
         this.deferredPrompt = null;
 
         // Aplicar Dark Mode inicial
@@ -32,6 +34,7 @@ class DietaApp {
         this.setupWeightTracker();
         this.setupSearch();
         this.setupAlerts();
+        this.setupShoppingList();
         this.applyInitialViewFromUrl();
         this.initPWAInstall();
     }
@@ -823,6 +826,124 @@ class DietaApp {
             }
         });
     }
+    /* --- LISTA DE COMPRAS --- */
+    setupShoppingList() {
+        // Asegurarse de que la lista maestra esté cargada
+        if (this.shoppingList.length === 0) {
+            this.shoppingList = this.generator.getAllShoppingList();
+            localStorage.setItem('shoppingList', JSON.stringify(this.shoppingList));
+        }
+
+        // Categoría activa inicial
+        this.activeCartCategory = this.shoppingList.length > 0 ? this.shoppingList[0].categoria : null;
+
+        this.renderCartTabs();
+        this.renderShoppingList();
+    }
+
+    renderCartTabs() {
+        const tabsContainer = document.getElementById('cart-tabs');
+        if (!tabsContainer) return;
+
+        // Obtener categorías únicas
+        const categories = [...new Set(this.shoppingList.map(item => item.categoria))];
+        
+        const catTitles = {
+            'lacteos':           'Lácteos',
+            'huevos':            'Huevos',
+            'cereales_desayuno': 'Cereales',
+            'cereales_almuerzo': 'Tubérculos',
+            'fruta_cubos':       'Frutas Picadas',
+            'fruta_mediana':     'Frutas Enteras',
+            'grasas_snack':      'Secos',
+            'grasas_almuerzo':   'Grasas',
+            'grasas_cena':       'Grasas',
+            'verduras':          'Verduras',
+            'carne_almuerzo':    'Proteínas',
+            'carne_cena':        'Proteínas'
+        };
+
+        tabsContainer.innerHTML = '';
+        categories.forEach(cat => {
+            const pill = document.createElement('button');
+            pill.className = `meal-tab ${this.activeCartCategory === cat ? 'active' : ''}`;
+            pill.textContent = catTitles[cat] || cat.toUpperCase();
+            
+            pill.addEventListener('click', () => {
+                this.activeCartCategory = cat;
+                this.renderCartTabs();
+                this.renderShoppingList();
+            });
+            
+            tabsContainer.appendChild(pill);
+        });
+    }
+
+    renderShoppingList() {
+        const container = document.getElementById('cart-items-container');
+        if (!container) return;
+
+        if (this.shoppingList.length === 0) {
+            container.innerHTML = `<div class="placeholder-text mt-4" style="text-align:center;">
+                <i class="ti ti-checklist" style="font-size:3rem; opacity:0.3; display:block; margin-bottom:1rem;"></i>
+                No se encontraron ingredientes.
+            </div>`;
+            return;
+        }
+
+        container.innerHTML = '';
+        
+        // Filtrar por categoría activa
+        const filteredItems = this.shoppingList.filter(item => item.categoria === this.activeCartCategory);
+
+        const iconMap = {
+            'lacteos':           '🥛',
+            'huevos':            '🥚',
+            'cereales':          '🌾',
+            'cereales_desayuno': '🌾',
+            'cereales_almuerzo': '🥔',
+            'cereales_cena':     '🥔',
+            'fruta':             '🍎',
+            'fruta_cubos':       '🍎',
+            'fruta_mediana':     '🍊',
+            'grasas':            '🥑',
+            'grasas_snack':      '🥜',
+            'grasas_almuerzo':   '🥑',
+            'grasas_cena':       '🥑',
+            'verduras':          '🥗',
+            'carne':             '🥩',
+            'carne_almuerzo':    '🥩',
+            'carne_cena':        '🍗'
+        };
+
+        filteredItems.forEach(item => {
+            const itemKey = `${item.categoria}|${item.name}`;
+            const isPurchased = this.purchasedItems[itemKey] || false;
+            
+            const card = document.createElement('div');
+            card.className = `cart-item section-anim ${isPurchased ? 'purchased' : ''}`;
+            card.style.marginBottom = '0.5rem';
+            
+            card.innerHTML = `
+                <div class="cart-checkbox">
+                    <i class="ti ti-check"></i>
+                </div>
+                <div class="cart-item-icon">${iconMap[item.categoria] || '🛒'}</div>
+                <div class="cart-item-text">
+                    <p>${item.name}</p>
+                </div>
+            `;
+
+            card.addEventListener('click', () => {
+                this.purchasedItems[itemKey] = !this.purchasedItems[itemKey];
+                localStorage.setItem('purchasedItems', JSON.stringify(this.purchasedItems));
+                card.classList.toggle('purchased');
+            });
+
+            container.appendChild(card);
+        });
+    }
+
     /* --- PWA INSTALLATION --- */
     initPWAInstall() {
         const installContainer = document.getElementById('install-container');

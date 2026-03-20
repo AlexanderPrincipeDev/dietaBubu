@@ -210,7 +210,7 @@ class DietaApp {
             }
 
             // Validar admin
-            const adminEmails = ['evelyn@gmail.com', 'principetolentinoa@gmail.com']; // Reemplaza con tus correos exactos de Google
+            const adminEmails = ['evelynpuerta7@gmail.com', 'principetolentinoa@gmail.com']; // Reemplaza con tus correos exactos de Google
             if (adminEmails.includes(user.email)) {
                 const navBtnAdmin = document.getElementById('nav-btn-admin');
                 if (navBtnAdmin) navBtnAdmin.style.display = 'flex';

@@ -214,6 +214,15 @@ class AdminPanel {
 
         this.inputNew.value = '';
         this.renderItems();
+        
+        // Pequeña vibración y auto-scroll en móviles
+        if (navigator.vibrate) navigator.vibrate(15);
+        
+        setTimeout(() => {
+            if (this.addRow) {
+                this.addRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }, 100);
     }
 }
 

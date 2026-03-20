@@ -150,9 +150,16 @@ class DietaApp {
         msgEl.textContent = message;
         toastEl.className = 'toast show ' + type;
         
-        if (type === 'success') iconEl.className = 'ti ti-check toast-icon';
-        else if (type === 'error') iconEl.className = 'ti ti-alert-circle toast-icon';
-        else iconEl.className = 'ti ti-info-circle toast-icon';
+        if (type === 'success') {
+            iconEl.className = 'ti ti-check toast-icon';
+            if (navigator.vibrate) navigator.vibrate([20, 30, 20]);
+        } else if (type === 'error') {
+            iconEl.className = 'ti ti-alert-circle toast-icon';
+            if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+        } else {
+            iconEl.className = 'ti ti-info-circle toast-icon';
+            if (navigator.vibrate) navigator.vibrate(20);
+        }
 
         if(this._toastTimeout) clearTimeout(this._toastTimeout);
         this._toastTimeout = setTimeout(() => {

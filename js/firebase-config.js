@@ -1,7 +1,7 @@
 // firebase-config.js
 
 const firebaseConfig = {
-    apiKey: "AIzaSyD4V-ZK2eaM4dL_rDEOlEIO2nLsLU_RS0",
+    apiKey: "AIzaSyD4V-ZK2eaM4dLr_7DEOlEIQ2nLslU_RS0",
     authDomain: "dietabubu.firebaseapp.com",
     projectId: "dietabubu",
     storageBucket: "dietabubu.firebasestorage.app",

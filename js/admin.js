@@ -28,10 +28,13 @@ class AdminPanel {
         this.btnMigrate.addEventListener('click', async () => {
             if (confirm("¿Seguro que deseas sobrescribir la nube con la dieta contenida localmente?")) {
                 try {
-                    this.btnMigrate.innerHTML = '<i class="ti ti-loader"></i> Subiendo...';
-                    await window.db.collection('dietData').doc('master').set(window.dietaBubu);
+                    this.btnMigrate.innerHTML = '<i class="ti ti-loader"></i> Restaurando...';
+                    const uid = window.app && window.app.currentUser ? window.app.currentUser.uid : null;
+                    if (!uid) throw new Error("Debes iniciar sesión primero");
                     
-                    if(window.app) window.app.showToast("¡Dieta inicial subida con éxito a Firestore!", "success");
+                    await window.db.collection('userDiets').doc(uid).set(window.dietaBubu);
+                    
+                    if(window.app) window.app.showToast("¡Dieta inicial restaurada con éxito a Firestore!", "success");
                     else alert("¡Dieta inicial subida con éxito a Firestore!");
                     
                     this.btnMigrate.innerHTML = '<i class="ti ti-check"></i> Carga Completa';
@@ -78,7 +81,10 @@ class AdminPanel {
             btn.innerHTML = '<i class="ti ti-loader"></i> Guardando...';
 
             try {
-                await window.db.collection('dietData').doc('master').set(this.workingData);
+                const uid = window.app && window.app.currentUser ? window.app.currentUser.uid : null;
+                if (!uid) throw new Error("Debes iniciar sesión primero");
+                
+                await window.db.collection('userDiets').doc(uid).set(this.workingData);
                 
                 if(window.app) window.app.showToast("¡Cambios guardados exitosamente en la nube!", "success");
                 else alert("¡Cambios guardados exitosamente en la nube!");

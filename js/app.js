@@ -48,7 +48,6 @@ class DietaApp {
 
         // Firebase Auth Config
         this.setupAuth();
-        this.loadCloudDiet();
 
         this.setupNavigation();
         this.setupHeader();
@@ -162,10 +161,10 @@ class DietaApp {
     }
 
     // --- FIREBASE SYNC & AUTH ---
-    async loadCloudDiet() {
-        if (!window.db) return;
+    async loadCloudDiet(uid) {
+        if (!window.db || !uid) return;
         try {
-            const docRef = db.collection('dietData').doc('master');
+            const docRef = db.collection('userDiets').doc(uid);
             const doc = await docRef.get();
             if (doc.exists) {
                 const cloudData = doc.data();
@@ -179,7 +178,7 @@ class DietaApp {
                 this.setupAlerts();
             }
         } catch (e) {
-            console.error("No se pudo cargar la dieta maestra de la nube:", e);
+            console.error("No se pudo cargar la dieta personal de la nube:", e);
         }
     }
 
@@ -230,14 +229,14 @@ class DietaApp {
             }
             this.updateGreeting();
 
-            // Validar admin
-            const adminEmails = ['evelynpuerta7@gmail.com', 'principetolentinoa@gmail.com']; // Reemplaza con tus correos exactos de Google
-            if (adminEmails.includes(user.email)) {
-                const navBtnAdmin = document.getElementById('nav-btn-admin');
-                if (navBtnAdmin) navBtnAdmin.style.display = 'flex';
-            }
+            // Mostrar pestaña "Mi Dieta" para cualquier usuario logueado
+            const navBtnAdmin = document.getElementById('nav-btn-admin');
+            if (navBtnAdmin) navBtnAdmin.style.display = 'flex';
+            
+            // Sync personal diet from Firestore
+            this.loadCloudDiet(user.uid);
 
-            // Sync from Firestore
+            // Sync progress from Firestore
             if (window.db) {
                 db.collection('users').doc(user.uid).get().then(doc => {
                     if (doc.exists) {
@@ -307,6 +306,11 @@ class DietaApp {
         } else {
             if (userNameEl) userNameEl.style.display = 'none';
             if (userAvatarEl) userAvatarEl.src = 'icons/avatar-evelyn.svg';
+            
+            // Ocultar pestaña Mi Dieta
+            const navBtnAdmin = document.getElementById('nav-btn-admin');
+            if (navBtnAdmin) navBtnAdmin.style.display = 'none';
+
             this.updateGreeting();
             // Al hacer logout no vaciamos localStorage para mantener el fallback rápido offline.
         }

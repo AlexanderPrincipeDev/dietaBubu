@@ -236,6 +236,45 @@
                 </div>
             </section>
 
+            <!-- VIEW: ADMIN PANEL -->
+            <section id="view-admin" class="view hidden">
+                <div class="page-title">
+                    <h2>Administrador ⚙️</h2>
+                    <p>Configura la dieta maestra</p>
+                </div>
+                
+                <div class="glass-card mt-3">
+                    <p class="tracker-desc mb-3">Si esta es tu primera vez, necesitas subir los datos originales a la nube.</p>
+                    <button class="btn-check ripple" id="btn-admin-migrate" style="background:var(--secondary);color:white;width:100%;">
+                        <i class="ti ti-cloud-upload"></i> Cargar dieta local a la nube
+                    </button>
+                </div>
+
+                <div class="glass-card mt-3">
+                    <h3>Alimentos y Listas</h3>
+                    <select id="admin-category-select" class="mt-2" style="width:100%; padding:0.8rem; border-radius:12px; border:1px solid rgba(0,0,0,0.1); font-family:var(--font-primary); font-size: 0.95rem; background: var(--bg-main); color: var(--text-main);">
+                        <option value="">-- Selecciona una categoría --</option>
+                    </select>
+
+                    <div id="admin-items-list" class="mt-3">
+                        <!-- Items rendered here -->
+                    </div>
+
+                    <div class="add-item-row mt-3" style="gap:0.5rem; display:none;" id="admin-add-row">
+                        <input type="text" id="admin-new-item" placeholder="Ej: 1 taza de fresas..." style="flex:1; padding:0.8rem; border-radius:12px; border:1px solid rgba(0,0,0,0.1); font-family:var(--font-primary); background: var(--bg-main); color: var(--text-main);">
+                        <button class="btn-icon" id="btn-admin-add" style="background:var(--primary); color:white; border-radius:12px; height:auto; padding:0 1rem;">
+                            <i class="ti ti-plus"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mt-4 mb-5" style="text-align:center;">
+                    <button id="btn-admin-save" class="btn-check ripple" style="background:var(--success); color:white; display:none; width:100%;">
+                        <i class="ti ti-device-floppy"></i> Guardar Cambios en la Nube
+                    </button>
+                </div>
+            </section>
+
         </main>
 
         <!-- BOTTOM NAVIGATION -->
@@ -260,6 +299,10 @@
                 <i class="ti ti-info-circle"></i>
                 <span>Guía</span>
             </button>
+            <button class="nav-item" data-target="view-admin" id="nav-btn-admin" style="display:none;">
+                <i class="ti ti-settings"></i>
+                <span>Admin</span>
+            </button>
         </nav>
     </div>
 
@@ -275,6 +318,7 @@
     <script src="js/data.js"></script>
     <script src="js/generator.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/admin.js"></script>
 
     <!-- Service Worker Registration -->
     <script>

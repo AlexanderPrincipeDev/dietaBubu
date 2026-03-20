@@ -28,7 +28,17 @@ class DietaApp {
     init() {
         this.checkNewDay();
         this.setupDarkMode();
-        
+
+        // Cache management for master diet
+        const cachedDiet = localStorage.getItem('cloudDietData');
+        if (cachedDiet) {
+            try {
+                const parsed = JSON.parse(cachedDiet);
+                Object.assign(this.generator.data, parsed);
+                window.dietaBubu = this.generator.data;
+            } catch (e) { }
+        }
+
         // Inicialización prioritaria de lista de compras para evitar errores de carga
         try {
             this.setupShoppingList();
@@ -38,6 +48,7 @@ class DietaApp {
 
         // Firebase Auth Config
         this.setupAuth();
+        this.loadCloudDiet();
 
         this.setupNavigation();
         this.setupHeader();
@@ -131,6 +142,27 @@ class DietaApp {
     }
 
     // --- FIREBASE SYNC & AUTH ---
+    async loadCloudDiet() {
+        if (!window.db) return;
+        try {
+            const docRef = db.collection('dietData').doc('master');
+            const doc = await docRef.get();
+            if (doc.exists) {
+                const cloudData = doc.data();
+                Object.assign(this.generator.data, cloudData);
+                window.dietaBubu = this.generator.data;
+                localStorage.setItem('cloudDietData', JSON.stringify(window.dietaBubu));
+
+                // Refresh UI with latest data
+                this.setupShoppingList();
+                this.renderMenu();
+                this.setupAlerts();
+            }
+        } catch (e) {
+            console.error("No se pudo cargar la dieta maestra de la nube:", e);
+        }
+    }
+
     saveState(key, value) {
         localStorage.setItem(key, typeof value === 'object' ? JSON.stringify(value) : value);
         if (this.currentUser && window.db) {
@@ -167,7 +199,7 @@ class DietaApp {
         this.currentUser = user;
         const userNameEl = document.getElementById('user-name');
         const userAvatarEl = document.getElementById('user-avatar');
-        
+
         if (user) {
             if (userNameEl) {
                 userNameEl.textContent = user.displayName ? user.displayName.split(' ')[0] : 'Usuario';
@@ -176,7 +208,14 @@ class DietaApp {
             if (userAvatarEl) {
                 userAvatarEl.src = user.photoURL || 'icons/avatar-evelyn.svg';
             }
-            
+
+            // Validar admin
+            const adminEmails = ['evelyn@gmail.com', 'principetolentinoa@gmail.com']; // Reemplaza con tus correos exactos de Google
+            if (adminEmails.includes(user.email)) {
+                const navBtnAdmin = document.getElementById('nav-btn-admin');
+                if (navBtnAdmin) navBtnAdmin.style.display = 'flex';
+            }
+
             // Sync from Firestore
             if (window.db) {
                 db.collection('users').doc(user.uid).get().then(doc => {
@@ -220,9 +259,9 @@ class DietaApp {
                             else document.body.classList.remove('dark-mode');
                             this.syncThemeColor();
                             const icon = document.getElementById('btn-dark-mode')?.querySelector('i');
-                            if(icon) icon.className = this.isDarkMode ? 'ti ti-sun' : 'ti ti-moon';
+                            if (icon) icon.className = this.isDarkMode ? 'ti ti-sun' : 'ti ti-moon';
                         }
-                        
+
                         if (changed) {
                             this.renderWaterTracker();
                             this.setupTracker();
@@ -322,7 +361,7 @@ class DietaApp {
         if (!menuData) return;
 
         let text = `*${menuData.mealName} - Dieta Bubu* 🤰\n\n`;
-        
+
         // 1. Agrupar los items por categoria (reutilizando lógica de render para consistencia)
         const groupedItems = {};
         menuData.items.forEach(item => {
@@ -333,23 +372,23 @@ class DietaApp {
         });
 
         const iconMap = {
-            'lacteos':           '🥛',
-            'huevos':            '🥚',
-            'cereales':          '🌾',
+            'lacteos': '🥛',
+            'huevos': '🥚',
+            'cereales': '🌾',
             'cereales_desayuno': '🌾',
             'cereales_almuerzo': '🥔',
-            'cereales_cena':     '🥔',
-            'fruta':             '🍎',
-            'fruta_cubos':       '🍎',
-            'fruta_mediana':     '🍊',
-            'grasas':            '🥑',
-            'grasas_snack':      '🥜',
-            'grasas_almuerzo':   '🥑',
-            'grasas_cena':       '🥑',
-            'verduras':          '🥗',
-            'carne':             '🥩',
-            'carne_almuerzo':    '🥩',
-            'carne_cena':        '🍗'
+            'cereales_cena': '🥔',
+            'fruta': '🍎',
+            'fruta_cubos': '🍎',
+            'fruta_mediana': '🍊',
+            'grasas': '🥑',
+            'grasas_snack': '🥜',
+            'grasas_almuerzo': '🥑',
+            'grasas_cena': '🥑',
+            'verduras': '🥗',
+            'carne': '🥩',
+            'carne_almuerzo': '🥩',
+            'carne_cena': '🍗'
         };
 
         for (const [categoria, items] of Object.entries(groupedItems)) {
@@ -363,7 +402,7 @@ class DietaApp {
 
         const encodedText = encodeURIComponent(text);
         const whatsappUrl = `https://wa.me/?text=${encodedText}`;
-        
+
         window.open(whatsappUrl, '_blank');
     }
 
@@ -400,10 +439,10 @@ class DietaApp {
                 const container = document.getElementById('meal-portions-container');
                 container.style.opacity = '0';
                 container.style.transition = 'none';
-                
+
                 // Render immediately
                 this.renderMenu();
-                
+
                 // Fade in
                 requestAnimationFrame(() => {
                     container.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
@@ -442,23 +481,23 @@ class DietaApp {
 
             // Titulo de la categoria
             const catTitles = {
-                'LACTEOS':           'Lácteos',
-                'HUEVOS':            'Huevos',
+                'LACTEOS': 'Lácteos',
+                'HUEVOS': 'Huevos',
                 'CEREALES_DESAYUNO': 'Cereales',
                 'CEREALES_ALMUERZO': 'Cereales',
-                'CEREALES_CENA':     'Cereales',
-                'CEREALES':          'Cereales',
-                'FRUTA_CUBOS':       'Fruta',
-                'FRUTA_MEDIANA':     'Fruta',
-                'FRUTA':             'Fruta',
-                'GRASAS_SNACK':      'Grasas (Frutos Secos)',
-                'GRASAS_ALMUERZO':   'Grasas',
-                'GRASAS_CENA':       'Grasas',
-                'GRASAS':            'Grasas',
-                'VERDURAS':          'Verduras',
-                'CARNE_ALMUERZO':    'Proteína',
-                'CARNE_CENA':        'Proteína',
-                'CARNE':             'Proteína'
+                'CEREALES_CENA': 'Cereales',
+                'CEREALES': 'Cereales',
+                'FRUTA_CUBOS': 'Fruta',
+                'FRUTA_MEDIANA': 'Fruta',
+                'FRUTA': 'Fruta',
+                'GRASAS_SNACK': 'Grasas (Frutos Secos)',
+                'GRASAS_ALMUERZO': 'Grasas',
+                'GRASAS_CENA': 'Grasas',
+                'GRASAS': 'Grasas',
+                'VERDURAS': 'Verduras',
+                'CARNE_ALMUERZO': 'Proteína',
+                'CARNE_CENA': 'Proteína',
+                'CARNE': 'Proteína'
             };
 
             let catTitle = catTitles[categoria.toUpperCase()] || categoria.toUpperCase();
@@ -479,23 +518,23 @@ class DietaApp {
                 el.className = 'portion-item section-anim';
 
                 const iconMap = {
-                    'lacteos':           '🥛',
-                    'huevos':            '🥚',
-                    'cereales':          '🌾',
+                    'lacteos': '🥛',
+                    'huevos': '🥚',
+                    'cereales': '🌾',
                     'cereales_desayuno': '🌾',
                     'cereales_almuerzo': '🥔',
-                    'cereales_cena':     '🥔',
-                    'fruta':             '🍎',
-                    'fruta_cubos':       '🍎',
-                    'fruta_mediana':     '🍊',
-                    'grasas':            '🥑',
-                    'grasas_snack':      '🥜',
-                    'grasas_almuerzo':   '🥑',
-                    'grasas_cena':       '🥑',
-                    'verduras':          '🥗',
-                    'carne':             '🥩',
-                    'carne_almuerzo':    '🥩',
-                    'carne_cena':        '🍗'
+                    'cereales_cena': '🥔',
+                    'fruta': '🍎',
+                    'fruta_cubos': '🍎',
+                    'fruta_mediana': '🍊',
+                    'grasas': '🥑',
+                    'grasas_snack': '🥜',
+                    'grasas_almuerzo': '🥑',
+                    'grasas_cena': '🥑',
+                    'verduras': '🥗',
+                    'carne': '🥩',
+                    'carne_almuerzo': '🥩',
+                    'carne_cena': '🍗'
                 };
 
                 const isLockedBtn = item.isLocked ? 'locked' : '';
@@ -963,15 +1002,15 @@ class DietaApp {
     setupShoppingList() {
         // Cargar lista MAESTRA INTELIGENTE (agrupada)
         this.shoppingList = this.generator.getSmartMasterList();
-        
+
         // Mapeo de categorías unificadas
         this.cartCategoryMapping = {
-            'lacteos':   'Lácteos',
+            'lacteos': 'Lácteos',
             'proteinas': 'Proteínas',
-            'cereales':  'Cereales',
-            'fruta':     'Frutas',
-            'grasas':    'Grasas',
-            'verduras':  'Verduras'
+            'cereales': 'Cereales',
+            'fruta': 'Frutas',
+            'grasas': 'Grasas',
+            'verduras': 'Verduras'
         };
 
         this.unifiedCategories = [...new Set(Object.values(this.cartCategoryMapping))];
@@ -985,14 +1024,14 @@ class DietaApp {
         if (btnToggle) {
             btnToggle.addEventListener('click', () => {
                 this.isFinalListActive = !this.isFinalListActive;
-                btnToggle.innerHTML = this.isFinalListActive 
-                    ? '<i class="ti ti-list-search"></i> Ver Catálogo' 
+                btnToggle.innerHTML = this.isFinalListActive
+                    ? '<i class="ti ti-list-search"></i> Ver Catálogo'
                     : '<i class="ti ti-shopping-cart"></i> Mi Lista';
-                
+
                 // Ocultar/Mostrar tabs según la vista
                 const tabs = document.getElementById('cart-tabs');
                 if (tabs) tabs.style.display = this.isFinalListActive ? 'none' : 'flex';
-                
+
                 // Título dinámico
                 const title = document.querySelector('#view-cart .page-title h2');
                 const subtitle = document.querySelector('#view-cart .page-title p');
@@ -1021,13 +1060,13 @@ class DietaApp {
             const pill = document.createElement('button');
             pill.className = `meal-tab ${this.activeCartCategory === catName ? 'active' : ''}`;
             pill.textContent = catName;
-            
+
             pill.addEventListener('click', () => {
                 this.activeCartCategory = catName;
                 this.renderCartTabs();
                 this.renderShoppingList();
             });
-            
+
             tabsContainer.appendChild(pill);
         });
     }
@@ -1039,7 +1078,7 @@ class DietaApp {
         container.innerHTML = '';
 
         let itemsToRender = [];
-        
+
         if (this.isFinalListActive) {
             // Mostrar solo los items seleccionados
             itemsToRender = this.shoppingList.filter(item => {
@@ -1056,25 +1095,25 @@ class DietaApp {
             }
         } else {
             // Mostrar catálogo filtrado por pestaña
-            itemsToRender = this.shoppingList.filter(item => 
+            itemsToRender = this.shoppingList.filter(item =>
                 this.cartCategoryMapping[item.categoria] === this.activeCartCategory
             );
         }
 
         const iconMap = {
-            'lacteos':   '🥛',
+            'lacteos': '🥛',
             'proteinas': '🥩',
-            'cereales':  '🌾',
-            'fruta':     '🍎',
-            'grasas':    '🥑',
-            'verduras':  '🥗'
+            'cereales': '🌾',
+            'fruta': '🍎',
+            'grasas': '🥑',
+            'verduras': '🥗'
         };
 
         itemsToRender.forEach(item => {
             const itemKey = `${item.categoria}|${item.name}`;
             const isSelected = this.selectedShoppingItems[itemKey] || false;
             const isPurchased = this.purchasedItems[itemKey] || false;
-            
+
             const card = document.createElement('div');
             // Si estamos en la lista final, usamos la clase 'purchased' para tachar.
             // Si estamos en el catalogo, usamos una clase visual para indicar que está en la lista.
@@ -1082,7 +1121,7 @@ class DietaApp {
                 ${this.isFinalListActive && isPurchased ? 'purchased' : ''} 
                 ${!this.isFinalListActive && isSelected ? 'item-selected' : ''}`;
             card.style.marginBottom = '0.5rem';
-            
+
             card.innerHTML = `
                 <div class="cart-checkbox">
                     <i class="ti ${this.isFinalListActive ? 'ti-check' : (isSelected ? 'ti-minus' : 'ti-plus')}"></i>
@@ -1104,7 +1143,7 @@ class DietaApp {
                     // Acción: Agregar/Quitar de "Mi Lista"
                     this.selectedShoppingItems[itemKey] = !this.selectedShoppingItems[itemKey];
                     this.saveState('selectedShoppingItems', this.selectedShoppingItems);
-                    
+
                     // Feedback visual inmediato
                     card.classList.toggle('item-selected');
                     const icon = card.querySelector('.cart-checkbox i');

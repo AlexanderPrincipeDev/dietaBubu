@@ -141,6 +141,26 @@ class DietaApp {
         }
     }
 
+    // --- UI HELPERS ---
+    showToast(message, type = 'success') {
+        const toastEl = document.getElementById('app-toast');
+        const iconEl = document.getElementById('toast-icon');
+        const msgEl = document.getElementById('toast-message');
+        if(!toastEl) return;
+
+        msgEl.textContent = message;
+        toastEl.className = 'toast show ' + type;
+        
+        if (type === 'success') iconEl.className = 'ti ti-check toast-icon';
+        else if (type === 'error') iconEl.className = 'ti ti-alert-circle toast-icon';
+        else iconEl.className = 'ti ti-info-circle toast-icon';
+
+        if(this._toastTimeout) clearTimeout(this._toastTimeout);
+        this._toastTimeout = setTimeout(() => {
+            toastEl.classList.remove('show');
+        }, 3500);
+    }
+
     // --- FIREBASE SYNC & AUTH ---
     async loadCloudDiet() {
         if (!window.db) return;

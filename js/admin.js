@@ -30,7 +30,10 @@ class AdminPanel {
                 try {
                     this.btnMigrate.innerHTML = '<i class="ti ti-loader"></i> Subiendo...';
                     await window.db.collection('dietData').doc('master').set(window.dietaBubu);
-                    alert("¡Dieta inicial subida con éxito a Firestore!");
+                    
+                    if(window.app) window.app.showToast("¡Dieta inicial subida con éxito a Firestore!", "success");
+                    else alert("¡Dieta inicial subida con éxito a Firestore!");
+                    
                     this.btnMigrate.innerHTML = '<i class="ti ti-check"></i> Carga Completa';
                     
                     // Trigger reload en la app si existe
@@ -40,7 +43,8 @@ class AdminPanel {
                     this.refreshEditor();
                 } catch (e) {
                     console.error(e);
-                    alert("Error subiendo datos a la nube. Revisa consola.");
+                    if(window.app) window.app.showToast("Error subiendo datos a la nube.", "error");
+                    else alert("Error subiendo datos a la nube. Revisa consola.");
                     this.btnMigrate.innerHTML = '<i class="ti ti-cloud-upload"></i> Cargar dieta inicial a la nube';
                 }
             }
@@ -75,7 +79,9 @@ class AdminPanel {
 
             try {
                 await window.db.collection('dietData').doc('master').set(this.workingData);
-                alert("¡Cambios guardados exitosamente en la nube!");
+                
+                if(window.app) window.app.showToast("¡Cambios guardados exitosamente en la nube!", "success");
+                else alert("¡Cambios guardados exitosamente en la nube!");
                 
                 // Actualizar la app en caliente
                 if (window.app) {
@@ -91,7 +97,8 @@ class AdminPanel {
                 }
             } catch(e) {
                 console.error(e);
-                alert("Error al guardar cambios.");
+                if(window.app) window.app.showToast("Error al guardar cambios.", "error");
+                else alert("Error al guardar cambios.");
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="ti ti-device-floppy"></i> Guardar Cambios en la Nube';

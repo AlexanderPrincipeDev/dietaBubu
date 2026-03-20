@@ -36,6 +36,9 @@ class DietaApp {
             console.error("Error al inicializar lista de compras:", e);
         }
 
+        // Firebase Auth Config
+        this.setupAuth();
+
         this.setupNavigation();
         this.setupHeader();
         this.setupGenerator();
@@ -57,9 +60,9 @@ class DietaApp {
             this.waterGlasses = 0;
             this.hasWalked = false;
             this.generator.clearLocks();
-            localStorage.setItem('waterGlasses', 0);
-            localStorage.setItem('hasWalked', false);
-            localStorage.setItem('lastCheckDate', today);
+            this.saveState('waterGlasses', 0);
+            this.saveState('hasWalked', false);
+            this.saveState('lastCheckDate', today);
         }
     }
 
@@ -75,7 +78,7 @@ class DietaApp {
 
         btnDark.addEventListener('click', () => {
             this.isDarkMode = !this.isDarkMode;
-            localStorage.setItem('isDarkMode', this.isDarkMode);
+            this.saveState('isDarkMode', this.isDarkMode);
             document.body.classList.toggle('dark-mode');
             this.syncThemeColor();
 
@@ -124,6 +127,127 @@ class DietaApp {
 
         if (validViews.has(requestedView)) {
             this.activateView(requestedView);
+        }
+    }
+
+    // --- FIREBASE SYNC & AUTH ---
+    saveState(key, value) {
+        localStorage.setItem(key, typeof value === 'object' ? JSON.stringify(value) : value);
+        if (this.currentUser && window.db) {
+            db.collection('users').doc(this.currentUser.uid).set({
+                [key]: value
+            }, { merge: true }).catch(console.error);
+        }
+    }
+
+    setupAuth() {
+        if (!window.auth) return;
+
+        const profileBtn = document.getElementById('user-profile');
+        if (profileBtn) {
+            profileBtn.addEventListener('click', () => {
+                if (this.currentUser) {
+                    if (confirm("¿Deseas cerrar sesión? (Tus datos seguirán guardados en la nube)")) {
+                        auth.signOut();
+                    }
+                } else {
+                    const provider = new firebase.auth.GoogleAuthProvider();
+                    auth.signInWithPopup(provider).catch(e => {
+                        console.error("Login fail:", e);
+                        alert("Error al iniciar sesión.");
+                    });
+                }
+            });
+        }
+
+        auth.onAuthStateChanged(user => this.handleAuthState(user));
+    }
+
+    handleAuthState(user) {
+        this.currentUser = user;
+        const userNameEl = document.getElementById('user-name');
+        const userAvatarEl = document.getElementById('user-avatar');
+        
+        if (user) {
+            if (userNameEl) {
+                userNameEl.textContent = user.displayName ? user.displayName.split(' ')[0] : 'Usuario';
+                userNameEl.style.display = 'block';
+            }
+            if (userAvatarEl) {
+                userAvatarEl.src = user.photoURL || 'icons/avatar-evelyn.svg';
+            }
+            
+            // Sync from Firestore
+            if (window.db) {
+                db.collection('users').doc(user.uid).get().then(doc => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        let changed = false;
+
+                        if (data.waterGlasses !== undefined && data.waterGlasses !== this.waterGlasses) {
+                            this.waterGlasses = data.waterGlasses;
+                            localStorage.setItem('waterGlasses', this.waterGlasses);
+                            changed = true;
+                        }
+                        if (data.hasWalked !== undefined && data.hasWalked !== this.hasWalked) {
+                            this.hasWalked = data.hasWalked;
+                            localStorage.setItem('hasWalked', this.hasWalked);
+                            changed = true;
+                        }
+                        if (data.weightLog !== undefined) {
+                            this.weightLog = data.weightLog;
+                            localStorage.setItem('weightLog', JSON.stringify(this.weightLog));
+                            changed = true;
+                        }
+                        if (data.selectedShoppingItems !== undefined) {
+                            this.selectedShoppingItems = data.selectedShoppingItems;
+                            localStorage.setItem('selectedShoppingItems', JSON.stringify(this.selectedShoppingItems));
+                            changed = true;
+                        }
+                        if (data.purchasedItems !== undefined) {
+                            this.purchasedItems = data.purchasedItems;
+                            localStorage.setItem('purchasedItems', JSON.stringify(this.purchasedItems));
+                            changed = true;
+                        }
+                        if (data.lastCheckDate !== undefined) {
+                            this.lastCheckDate = data.lastCheckDate;
+                            localStorage.setItem('lastCheckDate', this.lastCheckDate);
+                        }
+                        if (data.isDarkMode !== undefined && data.isDarkMode !== this.isDarkMode) {
+                            this.isDarkMode = data.isDarkMode;
+                            localStorage.setItem('isDarkMode', this.isDarkMode);
+                            if (this.isDarkMode) document.body.classList.add('dark-mode');
+                            else document.body.classList.remove('dark-mode');
+                            this.syncThemeColor();
+                            const icon = document.getElementById('btn-dark-mode')?.querySelector('i');
+                            if(icon) icon.className = this.isDarkMode ? 'ti ti-sun' : 'ti ti-moon';
+                        }
+                        
+                        if (changed) {
+                            this.renderWaterTracker();
+                            this.setupTracker();
+                            this.renderWeightSummary();
+                            this.renderWeightChart();
+                            this.renderShoppingList();
+                        }
+                    } else {
+                        // First time: upload local state to cloud
+                        db.collection('users').doc(user.uid).set({
+                            waterGlasses: this.waterGlasses,
+                            hasWalked: this.hasWalked,
+                            weightLog: this.weightLog,
+                            selectedShoppingItems: this.selectedShoppingItems,
+                            purchasedItems: this.purchasedItems,
+                            lastCheckDate: this.lastCheckDate || new Date().toDateString(),
+                            isDarkMode: this.isDarkMode
+                        });
+                    }
+                }).catch(e => console.error("Error sincronizando perfil:", e));
+            }
+        } else {
+            if (userNameEl) userNameEl.style.display = 'none';
+            if (userAvatarEl) userAvatarEl.src = 'icons/avatar-evelyn.svg';
+            // Al hacer logout no vaciamos localStorage para mantener el fallback rápido offline.
         }
     }
 
@@ -450,7 +574,7 @@ class DietaApp {
                 } else {
                     this.waterGlasses = i + 1;
                 }
-                localStorage.setItem('waterGlasses', this.waterGlasses);
+                this.saveState('waterGlasses', this.waterGlasses);
 
                 // Trigger Confetti si completa los 8 vasos
                 if (this.waterGlasses === 8) {
@@ -465,7 +589,7 @@ class DietaApp {
 
     toggleWalk() {
         this.hasWalked = !this.hasWalked;
-        localStorage.setItem('hasWalked', this.hasWalked);
+        this.saveState('hasWalked', this.hasWalked);
         const walkBtn = document.getElementById('btn-walk');
         const walkIcon = document.getElementById('walk-icon');
 
@@ -629,7 +753,7 @@ class DietaApp {
             // Mantener solo los últimos 90 días
             if (this.weightLog.length > 90) this.weightLog.shift();
 
-            localStorage.setItem('weightLog', JSON.stringify(this.weightLog));
+            this.saveState('weightLog', this.weightLog);
             input.value = '';
 
             // Feedback visual button
@@ -974,12 +1098,12 @@ class DietaApp {
                 if (this.isFinalListActive) {
                     // Acción: Marcar como Comprado
                     this.purchasedItems[itemKey] = !this.purchasedItems[itemKey];
-                    localStorage.setItem('purchasedItems', JSON.stringify(this.purchasedItems));
+                    this.saveState('purchasedItems', this.purchasedItems);
                     card.classList.toggle('purchased');
                 } else {
                     // Acción: Agregar/Quitar de "Mi Lista"
                     this.selectedShoppingItems[itemKey] = !this.selectedShoppingItems[itemKey];
-                    localStorage.setItem('selectedShoppingItems', JSON.stringify(this.selectedShoppingItems));
+                    this.saveState('selectedShoppingItems', this.selectedShoppingItems);
                     
                     // Feedback visual inmediato
                     card.classList.toggle('item-selected');

@@ -240,32 +240,95 @@ class DietGenerator {
     }
 
     /**
-     * Retorna TODOS los alimentos permitidos en la dieta, organizados por categoría.
-     * Esto sirve para una lista de compras "maestra".
+     * Retorna una lista MAESTRA "inteligente" donde se agrupan items específicos en nombres genéricos.
+     * Ej: "1 vaso de leche light" y "1 vaso de leche descremada" se agrupan en "Leche".
      */
-    getAllShoppingList() {
-        const aggregated = [];
+    getSmartMasterList() {
+        const smartAgrupado = {};
         
-        // Categorías que queremos incluir en la lista de compras
+        // Mapeo inteligente de palabras clave a nombres genéricos
+        const smartMapping = [
+            { keywords: ['leche'], label: 'Leche' },
+            { keywords: ['yogurt', 'yogur'], label: 'Yogurt' },
+            { keywords: ['queso'], label: 'Queso' },
+            { keywords: ['huevo', 'claras'], label: 'Huevos / Claras' },
+            { keywords: ['pan', 'tostada'], label: 'Pan / Tostadas' },
+            { keywords: ['avena'], label: 'Avena' },
+            { keywords: ['quinua'], label: 'Quinua' },
+            { keywords: ['arroz'], label: 'Arroz' },
+            { keywords: ['pasta', 'fideos'], label: 'Pasta' },
+            { keywords: ['papa', 'camote', 'yuca'], label: 'Tubérculos (Papa/Camote)' },
+            { keywords: ['pescado'], label: 'Pescado' },
+            { keywords: ['pollo'], label: 'Pollo' },
+            { keywords: [' res', 'carne de res'], label: 'Carne de Res' },
+            { keywords: ['pavita'], label: 'Pavita' },
+            { keywords: ['palta'], label: 'Palta' },
+            { keywords: ['aceituna'], label: 'Aceitunas' },
+            { keywords: ['aceite'], label: 'Aceite (Oliva/Vegetal)' },
+            { keywords: ['nueces', 'pecanas', 'cashews', 'maní', 'almendras'], label: 'Frutos Secos' },
+            { keywords: ['fresas', 'kiwi', 'piña', 'naranja', 'arándanos', 'aguaymanto', 'sandía', 'papaya', 'melón', 'pera', 'manzana', 'durazno', 'granadilla', 'mandarina', 'tuna'], label: 'Frutas' },
+            { keywords: ['zanahoria'], label: 'Zanahoria' },
+            { keywords: ['lechuga'], label: 'Lechuga' },
+            { keywords: ['betarraga'], label: 'Betarraga' },
+            { keywords: ['tomate'], label: 'Tomate' },
+            { keywords: ['brócoli', 'brocoli'], label: 'Brócoli' },
+            { keywords: ['espinaca', 'acelga'], label: 'Espinaca / Acelga' },
+            { keywords: ['pepino'], label: 'Pepino' },
+            { keywords: ['zapallito', 'caigua'], label: 'Zapallito / Caigua' },
+            { keywords: ['verdura', 'ensalada'], label: 'Verduras Variadas' }
+        ];
+
         const categories = [
             'lacteos', 'huevos', 'cereales_desayuno', 'cereales_almuerzo', 
             'fruta_cubos', 'fruta_mediana', 'grasas_snack', 'grasas_almuerzo', 
             'grasas_cena', 'verduras', 'carne_almuerzo', 'carne_cena'
         ];
 
+        const catMap = {
+            'lacteos': 'lacteos',
+            'huevos': 'proteinas',
+            'cereales_desayuno': 'cereales',
+            'cereales_almuerzo': 'cereales',
+            'cereales_cena': 'cereales',
+            'fruta_cubos': 'fruta',
+            'fruta_mediana': 'fruta',
+            'grasas_snack': 'grasas',
+            'grasas_almuerzo': 'grasas',
+            'grasas_cena': 'grasas',
+            'verduras': 'verduras',
+            'carne_almuerzo': 'proteinas',
+            'carne_cena': 'proteinas'
+        };
+
         categories.forEach(cat => {
             const options = this.data.alimentos[cat];
-            if (options) {
-                options.forEach(name => {
-                    aggregated.push({
-                        name,
-                        categoria: cat,
-                        count: 1 // No hay conteo, es solo la opción
-                    });
-                });
-            }
+            if (!options) return;
+
+            options.forEach(originalName => {
+                const lowerName = originalName.toLowerCase();
+                let finalLabel = originalName; // Fallback al original
+
+                // Buscar si coincide con alguna regla smart
+                const rule = smartMapping.find(r => r.keywords.some(k => lowerName.includes(k)));
+                if (rule) {
+                    finalLabel = rule.label;
+                }
+
+                const groupCat = catMap[cat] || cat;
+                const key = `${groupCat}|${finalLabel}`;
+                if (!smartAgrupado[key]) {
+                    smartAgrupado[key] = {
+                        name: finalLabel,
+                        categoria: groupCat,
+                        originalNames: [] // Para auditoria si fuera necesario
+                    };
+                }
+                if (!smartAgrupado[key].originalNames.includes(originalName)) {
+                    smartAgrupado[key].originalNames.push(originalName);
+                }
+            });
         });
 
-        return aggregated;
+        return Object.values(smartAgrupado);
     }
 }

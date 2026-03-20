@@ -168,8 +168,16 @@ const dietaBubu = {
         ],
         // ─── VERDURAS (almuerzo y cena) ─────────────────────────────────────
         "verduras": [
-            "½ taza de verduras cocidas",
-            "1 taza de verduras frescas"
+            "Zanahoria (cocida o fresca)",
+            "Lechuga",
+            "Betarraga",
+            "Tomate",
+            "Brócoli",
+            "Espinaca o Acelga",
+            "Pepino",
+            "Zapallito italiano o Caigua",
+            "½ taza de verduras cocidas variadas",
+            "1 taza de verduras frescas variadas"
         ],
         // ─── PROTEÍNAS / CARNE almuerzo ─────────────────────────────────────
         "carne_almuerzo": [

@@ -1009,6 +1009,21 @@ body.dark-mode .meal-tab.active {
     color: var(--text-muted);
 }
 
+.cart-item.item-selected {
+    border-color: var(--primary);
+    background: rgba(255, 138, 101, 0.05);
+}
+
+.cart-item.item-selected .cart-checkbox {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.cart-item.item-selected .cart-checkbox i {
+    display: block;
+    color: white;
+}
+
 .cart-checkbox {
     width: 24px;
     height: 24px;
@@ -1035,6 +1050,28 @@ body.dark-mode .meal-tab.active {
 
 .cart-item.purchased .cart-checkbox i {
     display: block;
+}
+
+.btn-toggle-cart {
+    background: var(--surface);
+    color: var(--primary);
+    border: 1px solid var(--primary);
+    padding: 0.45rem 1rem;
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
+    font-weight: 700;
+    font-family: 'Outfit', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-toggle-cart:active {
+    transform: scale(0.95);
+    background: var(--primary);
+    color: white;
 }
 
 .cart-item-icon {

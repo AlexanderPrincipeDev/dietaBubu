@@ -11,8 +11,10 @@ class DietaApp {
         this.lastCheckDate = localStorage.getItem('lastCheckDate');
         this.isDarkMode = localStorage.getItem('isDarkMode') === 'true';
         this.weightLog = JSON.parse(localStorage.getItem('weightLog')) || [];
-        this.shoppingList = JSON.parse(localStorage.getItem('shoppingList')) || [];
+        this.shoppingList = []; // Se llena dinámicamente con smart list
+        this.selectedShoppingItems = JSON.parse(localStorage.getItem('selectedShoppingItems')) || {}; // { "categoria|nombre": true }
         this.purchasedItems = JSON.parse(localStorage.getItem('purchasedItems')) || {}; // { "categoria|nombre": true }
+        this.isFinalListActive = false; // Toggle entre catálogo y lista final
         this.deferredPrompt = null;
 
         // Aplicar Dark Mode inicial
@@ -835,33 +837,51 @@ class DietaApp {
     }
     /* --- LISTA DE COMPRAS --- */
     setupShoppingList() {
-        // Siempre cargar la lista maestra desde el generador para asegurar datos frescos
-        // Esto evita depender de un localStorage potencialmente antiguo/corrupto para la estructura
-        this.shoppingList = this.generator.getAllShoppingList();
+        // Cargar lista MAESTRA INTELIGENTE (agrupada)
+        this.shoppingList = this.generator.getSmartMasterList();
         
-        // Definición de grupos unificados
+        // Mapeo de categorías unificadas
         this.cartCategoryMapping = {
-            'lacteos':           'Lácteos',
-            'huevos':            'Huevos',
-            'cereales_desayuno': 'Cereales',
-            'cereales_almuerzo': 'Cereales',
-            'cereales_cena':     'Cereales',
-            'fruta_cubos':       'Frutas',
-            'fruta_mediana':     'Frutas',
-            'grasas_snack':      'Grasas',
-            'grasas_almuerzo':   'Grasas',
-            'grasas_cena':       'Grasas',
-            'verduras':          'Verduras',
-            'carne_almuerzo':    'Proteínas',
-            'carne_cena':        'Proteínas'
+            'lacteos':   'Lácteos',
+            'proteinas': 'Proteínas',
+            'cereales':  'Cereales',
+            'fruta':     'Frutas',
+            'grasas':    'Grasas',
+            'verduras':  'Verduras'
         };
 
-        // Grupos únicos para los Tabs
         this.unifiedCategories = [...new Set(Object.values(this.cartCategoryMapping))];
 
-        // Categoría activa inicial (usando el nombre unificado)
         if (!this.activeCartCategory || !this.unifiedCategories.includes(this.activeCartCategory)) {
             this.activeCartCategory = this.unifiedCategories[0];
+        }
+
+        // Listener para el toggle de Mi Lista
+        const btnToggle = document.getElementById('btn-toggle-cart-view');
+        if (btnToggle) {
+            btnToggle.addEventListener('click', () => {
+                this.isFinalListActive = !this.isFinalListActive;
+                btnToggle.innerHTML = this.isFinalListActive 
+                    ? '<i class="ti ti-list-search"></i> Ver Catálogo' 
+                    : '<i class="ti ti-shopping-cart"></i> Mi Lista';
+                
+                // Ocultar/Mostrar tabs según la vista
+                const tabs = document.getElementById('cart-tabs');
+                if (tabs) tabs.style.display = this.isFinalListActive ? 'none' : 'flex';
+                
+                // Título dinámico
+                const title = document.querySelector('#view-cart .page-title h2');
+                const subtitle = document.querySelector('#view-cart .page-title p');
+                if (this.isFinalListActive) {
+                    title.textContent = 'Mi Lista Final';
+                    subtitle.textContent = 'Cosas por comprar 🛒';
+                } else {
+                    title.textContent = 'Catálogo de Opciones';
+                    subtitle.textContent = 'Elige qué comprar 🛒';
+                }
+
+                this.renderShoppingList();
+            });
         }
 
         this.renderCartTabs();
@@ -892,58 +912,84 @@ class DietaApp {
         const container = document.getElementById('cart-items-container');
         if (!container) return;
 
-        if (this.shoppingList.length === 0) {
-            container.innerHTML = `<div class="placeholder-text mt-4" style="text-align:center;">
-                <i class="ti ti-checklist" style="font-size:3rem; opacity:0.3; display:block; margin-bottom:1rem;"></i>
-                No se encontraron ingredientes.
-            </div>`;
-            return;
+        container.innerHTML = '';
+
+        let itemsToRender = [];
+        
+        if (this.isFinalListActive) {
+            // Mostrar solo los items seleccionados
+            itemsToRender = this.shoppingList.filter(item => {
+                const itemKey = `${item.categoria}|${item.name}`;
+                return this.selectedShoppingItems[itemKey];
+            });
+
+            if (itemsToRender.length === 0) {
+                container.innerHTML = `<div class="placeholder-text mt-4" style="text-align:center;">
+                    <i class="ti ti-shopping-cart-x" style="font-size:3rem; opacity:0.3; display:block; margin-bottom:1rem;"></i>
+                    Tu lista de compras está vacía.<br>Elige items del catálogo primero.
+                </div>`;
+                return;
+            }
+        } else {
+            // Mostrar catálogo filtrado por pestaña
+            itemsToRender = this.shoppingList.filter(item => 
+                this.cartCategoryMapping[item.categoria] === this.activeCartCategory
+            );
         }
 
-        container.innerHTML = '';
-        
-        // Filtrar por nombre de categoría unificado
-        const filteredItems = this.shoppingList.filter(item => 
-            this.cartCategoryMapping[item.categoria] === this.activeCartCategory
-        );
-
         const iconMap = {
-            'lacteos':           '🥛',
-            'huevos':            '🥚',
-            'cereales_desayuno': '🌾',
-            'cereales_almuerzo': '🥔',
-            'fruta_cubos':       '🍎',
-            'fruta_mediana':     '🍊',
-            'grasas_snack':      '🥜',
-            'grasas_almuerzo':   '🥑',
-            'grasas_cena':       '🥑',
-            'verduras':          '🥗',
-            'carne_almuerzo':    '🥩',
-            'carne_cena':        '🍗'
+            'lacteos':   '🥛',
+            'proteinas': '🥩',
+            'cereales':  '🌾',
+            'fruta':     '🍎',
+            'grasas':    '🥑',
+            'verduras':  '🥗'
         };
 
-        filteredItems.forEach(item => {
+        itemsToRender.forEach(item => {
             const itemKey = `${item.categoria}|${item.name}`;
+            const isSelected = this.selectedShoppingItems[itemKey] || false;
             const isPurchased = this.purchasedItems[itemKey] || false;
             
             const card = document.createElement('div');
-            card.className = `cart-item section-anim ${isPurchased ? 'purchased' : ''}`;
+            // Si estamos en la lista final, usamos la clase 'purchased' para tachar.
+            // Si estamos en el catalogo, usamos una clase visual para indicar que está en la lista.
+            card.className = `cart-item section-anim 
+                ${this.isFinalListActive && isPurchased ? 'purchased' : ''} 
+                ${!this.isFinalListActive && isSelected ? 'item-selected' : ''}`;
             card.style.marginBottom = '0.5rem';
             
             card.innerHTML = `
                 <div class="cart-checkbox">
-                    <i class="ti ti-check"></i>
+                    <i class="ti ${this.isFinalListActive ? 'ti-check' : (isSelected ? 'ti-minus' : 'ti-plus')}"></i>
                 </div>
                 <div class="cart-item-icon">${iconMap[item.categoria] || '🛒'}</div>
                 <div class="cart-item-text">
                     <p>${item.name}</p>
+                    ${!this.isFinalListActive ? `<small style="opacity:0.6">${item.originalNames.length} opciones</small>` : ''}
                 </div>
             `;
 
             card.addEventListener('click', () => {
-                this.purchasedItems[itemKey] = !this.purchasedItems[itemKey];
-                localStorage.setItem('purchasedItems', JSON.stringify(this.purchasedItems));
-                card.classList.toggle('purchased');
+                if (this.isFinalListActive) {
+                    // Acción: Marcar como Comprado
+                    this.purchasedItems[itemKey] = !this.purchasedItems[itemKey];
+                    localStorage.setItem('purchasedItems', JSON.stringify(this.purchasedItems));
+                    card.classList.toggle('purchased');
+                } else {
+                    // Acción: Agregar/Quitar de "Mi Lista"
+                    this.selectedShoppingItems[itemKey] = !this.selectedShoppingItems[itemKey];
+                    localStorage.setItem('selectedShoppingItems', JSON.stringify(this.selectedShoppingItems));
+                    
+                    // Feedback visual inmediato
+                    card.classList.toggle('item-selected');
+                    const icon = card.querySelector('.cart-checkbox i');
+                    if (this.selectedShoppingItems[itemKey]) {
+                        icon.className = 'ti ti-minus';
+                    } else {
+                        icon.className = 'ti ti-plus';
+                    }
+                }
             });
 
             container.appendChild(card);

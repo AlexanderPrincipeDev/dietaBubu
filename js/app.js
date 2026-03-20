@@ -208,6 +208,7 @@ class DietaApp {
             if (userAvatarEl) {
                 userAvatarEl.src = user.photoURL || 'icons/avatar-evelyn.svg';
             }
+            this.updateGreeting();
 
             // Validar admin
             const adminEmails = ['evelynpuerta7@gmail.com', 'principetolentinoa@gmail.com']; // Reemplaza con tus correos exactos de Google
@@ -286,6 +287,7 @@ class DietaApp {
         } else {
             if (userNameEl) userNameEl.style.display = 'none';
             if (userAvatarEl) userAvatarEl.src = 'icons/avatar-evelyn.svg';
+            this.updateGreeting();
             // Al hacer logout no vaciamos localStorage para mantener el fallback rápido offline.
         }
     }
@@ -309,7 +311,20 @@ class DietaApp {
         dateString = dateString.charAt(0).toUpperCase() + dateString.slice(1);
         dateElement.textContent = dateString;
 
-        // Dynamic Greeting Good Morning/Afternoon/Night
+        this.updateGreeting();
+
+        // Subtítulo
+        subtitleElement.textContent = `Es hora de tu ${this.generator.formatMealName(this.currentMealId)}`;
+
+        // Tip aleatorio
+        const tips = this.generator.data.recomendacionesGenerales;
+        document.getElementById('daily-tip').textContent = tips[Math.floor(Math.random() * tips.length)];
+    }
+
+    updateGreeting() {
+        const greetingTitle = document.getElementById('greeting-title');
+        if (!greetingTitle) return;
+
         const hour = new Date().getHours();
         let greeting = '¡Buenos días';
         let emoji = '☀️';
@@ -320,14 +335,13 @@ class DietaApp {
             greeting = '¡Buenas noches';
             emoji = '🌙';
         }
-        greetingTitle.textContent = `${greeting}, Evelyn!!! ${emoji}`;
-
-        // Subtítulo
-        subtitleElement.textContent = `Es hora de tu ${this.generator.formatMealName(this.currentMealId)}`;
-
-        // Tip aleatorio
-        const tips = this.generator.data.recomendacionesGenerales;
-        document.getElementById('daily-tip').textContent = tips[Math.floor(Math.random() * tips.length)];
+        
+        let firstName = 'Evelyn';
+        if (this.currentUser && this.currentUser.displayName) {
+            firstName = this.currentUser.displayName.split(' ')[0];
+        }
+        
+        greetingTitle.textContent = `${greeting}, ${firstName}!!! ${emoji}`;
     }
 
     /* --- GENERADOR DE DIETA --- */

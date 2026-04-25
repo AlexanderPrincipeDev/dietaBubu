@@ -1,213 +1,411 @@
 const dietaBubu = {
+    "version": "2026-04-24",
+    "hidratacion": {
+        "metaVasos": 9,
+        "metaTexto": "Meta: 1.8 L minimo al dia"
+    },
     "recomendacionesGenerales": [
-        "Beber 6 a 8 vasos de agua al día",
-        "Dormir mínimo 6–7 horas",
-        "Esperar 1–2 horas después de cenar antes de dormir",
-        "Caminata leve-moderada 45 min diarios (15 min mañana + 30 min tarde/noche)",
-        "Cocinar: sancochado, al horno, a la plancha, guisos, parrilla, sudado o escalfado",
-        "Reducir sal y azúcar",
-        "Masticar bien los alimentos y comer tranquila"
+        "Realizar 3 comidas principales y 2-3 snacks al dia",
+        "Incluir proteina en cada comida",
+        "Consumir 2-3 frutas al dia",
+        "Consumir 2-3 porciones de verduras al dia",
+        "Incluir grasas saludables como palta, aceite de oliva o frutos secos",
+        "Beber aproximadamente 2-2.5 litros de agua al dia",
+        "Limitar la cafeina a maximo 1 taza de cafe al dia",
+        "Esperar al menos 2 horas despues de cenar antes de acostarse"
+    ],
+    "sintomasDigestivos": {
+        "Nauseas": [
+            "Comer pequenas porciones cada 2-3 horas",
+            "No permanecer mucho tiempo con el estomago vacio",
+            "Consumir galletas saladas o tostadas antes de levantarse",
+            "Preferir alimentos suaves como arroz, papa, pan o avena",
+            "Evitar frituras, comidas grasas y olores intensos"
+        ],
+        "Acidez": [
+            "Comer porciones pequenas",
+            "Evitar acostarse hasta 2 horas despues de comer",
+            "Preferir cenas ligeras",
+            "Evitar frituras, chocolate, cafe y comidas picantes"
+        ],
+        "Estrenimiento": [
+            "Consumir 25-30 g de fibra al dia",
+            "Beber 2-2.5 litros de agua",
+            "Incluir papaya, ciruelas o kiwi",
+            "Consumir avena, quinua o pan integral",
+            "Realizar caminatas diarias"
+        ]
+    },
+    "alimentosHierro": [
+        "Carne de res magra",
+        "Pollo",
+        "Pescado",
+        "Lentejas",
+        "Garbanzos",
+        "Frejoles",
+        "Espinaca",
+        "Quinua"
+    ],
+    "alimentosFolato": [
+        "Espinaca, acelga, brocoli, lechuga romana y esparragos",
+        "Lentejas, garbanzos, frijoles, habas y arvejas",
+        "Naranja, mandarina, papaya, palta, mango y fresas",
+        "Quinua, kiwicha, avena, arroz integral y pan integral",
+        "Huevos, frutos secos y semillas"
     ],
     "noPermitidos": [
-        "Alimentos con octógonos: alto en grasas saturadas, grasas trans o azúcar",
-        "Azúcar, miel, panela, algarrobina",
-        "Frutas de alto índice glucémico: Plátano, Mango, Uvas, Lúcuma, Chirimoya",
-        "Embutidos",
-        "Frituras",
-        "Pastelería",
-        "Mayonesa y mantequilla",
-        "Golosinas, dulces y chocolates",
+        "Alcohol",
+        "Carnes o pescados crudos (sushi, carpaccio)",
+        "Huevos crudos o poco cocidos",
+        "Quesos no pasteurizados",
+        "Embutidos crudos (jamon iberico, salame, jamon serrano)",
+        "Pescados con alto contenido de mercurio (pez espada, tiburon)",
+        "Frituras frecuentes",
         "Gaseosas y jugos envasados"
     ],
     "bebidasPermitidas": [
-        "Manzanilla", "Jamaica", "Anís", "Hierba Luisa", "Emoliente", "Agua",
-        "Agua de piña", "Agua de manzana", "Agua de durazno", "Chicha morada"
+        "Agua",
+        "Infusion de menta",
+        "Infusion de hierba luisa",
+        "Infusion de hierba buena",
+        "Te de jengibre",
+        "Agua de cascara de pina",
+        "Agua de cascara de manzana",
+        "Chicha casera sin azucar",
+        "Limonada casera sin azucar",
+        "Suerox"
     ],
-    // Sustitutos de antojos (sin plátano ni mango — están prohibidos)
     "antojos": {
-        "papas fritas": "Papa al horno con orégano o bastones de camote asado 🍠",
-        "chocolate": "1 cuadradito de chocolate amargo (más del 70% cacao) 🍫",
-        "gaseosa": "Agua con gas, rodajas de limón/naranja y hielo 🧊🍋",
-        "dulce": "1 porción de tu fruta permitida (ej. Fresas, Kiwi, Tuna) 🍓",
-        "pizza": "Pita pizza: pan pita sin gluten, salsa de tomate natural, queso fresco y orégano 🍕",
-        "helado": "Yogurt griego descremado congelado con fresas o kiwi 🍦",
-        "galletas": "Galletas de avena y fruta caseras (avena + pera o manzana machacada, al horno) 🍪",
-        "antojo": "Agua de piña bien fría, manzanilla con canela, o tu fruta permitida favorita 💧"
+        "papas fritas": "Papa o camote al horno con oregano",
+        "chocolate": "Yogurt griego con canela o una porcion pequena de fruta del plan",
+        "gaseosa": "Agua con hielo, rodajas de limon o naranja",
+        "dulce": "Papaya, kiwi, fresas o una porcion pequena de fruta del plan",
+        "helado": "Yogurt griego congelado con fresas",
+        "galletas": "Galletas Salmas o bizcocho casero pequeno",
+        "antojo": "Una infusion fria, fruta del plan o yogurt griego"
     },
     "comidas": {
         "desayuno": {
-            "horaAprox": "8:00am",
-            "porciones": [
-                { "categoria": "lacteos", "cantidad": 1 },
-                { "categoria": "huevos", "cantidad": 1 },
-                { "categoria": "cereales_desayuno", "cantidad": 2 },
-                { "categoria": "fruta_cubos", "cantidad": 1 }
+            "horaAprox": "7:00 - 8:00 am",
+            "tipo": "opciones",
+            "opciones": [
+                {
+                    "titulo": "Opcion A",
+                    "items": [
+                        "2 rapiditas o 2 pan pita o 2 tortillas de maiz o 2 arepas chicas (30 g)",
+                        "1/4 de palta",
+                        "60 g de pollo deshilachado o 2 huevos cocidos",
+                        "40 g de queso fresco bajo en grasa"
+                    ],
+                    "nota": "Tomar una infusion despues de terminar todo"
+                },
+                {
+                    "titulo": "Opcion B",
+                    "items": [
+                        "2 tostadas Bimbo Vital",
+                        "1/8 de palta",
+                        "Omelette de 2 huevos con 1/4 cdta de aceite de oliva",
+                        "3/4 taza de yogurt griego natural con 1 cdta de chia o linaza"
+                    ]
+                },
+                {
+                    "titulo": "Opcion C",
+                    "items": [
+                        "1/2-3/4 taza de avena espesa cocida con 1 taza de leche",
+                        "1/4 de manzana rallada",
+                        "1 cda de chia o linaza, canela y vainilla",
+                        "8 almendras o 3 pecanas o 3 nueces trituradas",
+                        "2 huevos cocidos"
+                    ]
+                },
+                {
+                    "titulo": "Opcion D",
+                    "items": [
+                        "2 panqueques de avena",
+                        "1/2 taza de yogurt natural",
+                        "3 nueces o pecanas",
+                        "1 huevo o 40 g de queso fresco o 1 tajada de jamon de pavo"
+                    ],
+                    "nota": "Tomar una infusion despues de terminar todo"
+                }
             ]
         },
         "media_manana": {
-            "horaAprox": "10:30 – 11:00am",
-            "porciones": [
-                { "categoria": "grasas_snack", "cantidad": 2 },
-                { "categoria": "fruta_mediana", "cantidad": 1 }
+            "horaAprox": "10:30 am",
+            "tipo": "opciones",
+            "opciones": [
+                {
+                    "titulo": "Opcion 1",
+                    "items": [
+                        "3/4 taza de yogurt",
+                        "1 cda de chia o linaza",
+                        "2 cdas de granola Union o 1/4 taza de hojuelas de maiz Life Cero",
+                        "1 porcion de fruta"
+                    ]
+                },
+                {
+                    "titulo": "Opcion 2",
+                    "items": [
+                        "1 barra de cereal pequena (7 Dragons, Mama Lama o 1/2 Nature Valley)",
+                        "1 porcion de fruta",
+                        "1 taza de leche"
+                    ]
+                },
+                {
+                    "titulo": "Opcion 3",
+                    "items": [
+                        "1 pan pita",
+                        "1/4 de palta",
+                        "1 tajada de queso fresco (40 g)",
+                        "1 porcion de fruta"
+                    ]
+                },
+                {
+                    "titulo": "Opcion 4",
+                    "items": [
+                        "1 manzana verde en trozos",
+                        "2 cdas de mantequilla de mani",
+                        "3/4 taza de yogurt griego"
+                    ]
+                },
+                {
+                    "titulo": "Opcion 5",
+                    "items": [
+                        "1 porcion chica de bizcocho casero",
+                        "3/4 taza de yogurt"
+                    ]
+                }
             ]
         },
         "almuerzo": {
-            "horaAprox": "1:00pm",
+            "horaAprox": "1:30 pm",
             "porciones": [
-                { "categoria": "cereales_almuerzo", "cantidad": 2 },
-                { "categoria": "grasas_almuerzo", "cantidad": 2 },
-                { "categoria": "verduras", "cantidad": 2 },
-                { "categoria": "carne_almuerzo", "cantidad": 2 }
+                { "categoria": "cereales_almuerzo", "cantidad": 1 },
+                { "categoria": "carne_almuerzo", "cantidad": 1 },
+                { "categoria": "verduras", "cantidad": 1 },
+                { "categoria": "grasas_almuerzo", "cantidad": 1 }
             ]
         },
         "media_tarde": {
-            "horaAprox": "5:00pm",
-            "porciones": [
-                { "categoria": "lacteos", "cantidad": 1 },
-                { "categoria": "cereales_desayuno", "cantidad": 1 },
-                { "categoria": "grasas_snack", "cantidad": 1 }
+            "horaAprox": "4:00 pm",
+            "tipo": "opciones",
+            "opciones": [
+                {
+                    "titulo": "Opcion 1",
+                    "items": [
+                        "3/4 taza de yogurt griego",
+                        "1 punado de pasas morenas",
+                        "1/4 taza de hojuelas de maiz Life Cero"
+                    ]
+                },
+                {
+                    "titulo": "Opcion 2",
+                    "items": [
+                        "1 paquete de galletas Salmas o 1 pan pita",
+                        "40 g de queso fresco",
+                        "1 porcion de fruta"
+                    ]
+                }
             ]
         },
         "cena": {
-            "horaAprox": "8:00pm",
-            "porciones": [
-                { "categoria": "cereales_almuerzo", "cantidad": 1 },
-                { "categoria": "verduras", "cantidad": 3 },
-                { "categoria": "carne_cena", "cantidad": 2 },
-                { "categoria": "grasas_cena", "cantidad": 2 }
+            "horaAprox": "7:00 pm",
+            "tipo": "opciones",
+            "opciones": [
+                {
+                    "titulo": "Cena base",
+                    "items": [
+                        "1 opcion de carbohidrato ligero de la lista de cena",
+                        "1 opcion de proteina de la lista de cena",
+                        "1 taza de ensalada fresca o cocida",
+                        "1/8 de palta o aliño ligero"
+                    ]
+                },
+                {
+                    "titulo": "Rapidita tostada",
+                    "items": [
+                        "1 rapidita",
+                        "1 tajada de jamon de pavo",
+                        "1 tajada de queso fresco"
+                    ]
+                },
+                {
+                    "titulo": "Wrap de pollo",
+                    "items": [
+                        "1 tortilla rapidita",
+                        "Lechuga, arugula, alcachofa, zanahoria y pepino",
+                        "4 cdas de pollo deshilachado",
+                        "Limon, sal, pimienta, mostaza y 1 pizca de aceite de oliva"
+                    ]
+                },
+                {
+                    "titulo": "Salpicon de pollo o atun",
+                    "items": [
+                        "Lechuga, arugula, alcachofa, zanahoria y arverjitas",
+                        "4 cdas de pollo o atun deshilachado",
+                        "1/8 de palta",
+                        "1 rodaja de papa blanca"
+                    ]
+                },
+                {
+                    "titulo": "Omelette de vegetales",
+                    "items": [
+                        "1/2-1 taza de vegetales salteados",
+                        "3 claras de huevo",
+                        "30 g de queso fresco o cottage",
+                        "1/2-1 paquete de Salmas"
+                    ]
+                },
+                {
+                    "titulo": "Hamburguesa casera",
+                    "items": [
+                        "60 g de hamburguesa casera a la plancha o air fryer",
+                        "Lechuga y tomate",
+                        "1 cdta de mayonesa de palta",
+                        "1/3 taza de tiras de papa amarilla al air fryer"
+                    ]
+                },
+                {
+                    "titulo": "Tacos de pescado",
+                    "items": [
+                        "60 g de filete de pescado a la plancha",
+                        "1 tortilla",
+                        "1/2 taza de zanahoria y col rallada",
+                        "1/8 de palta y 1 cdta de mostaza"
+                    ]
+                },
+                {
+                    "titulo": "Ensalada de lentejas y salmon",
+                    "items": [
+                        "1/2 taza de lentejas cocidas",
+                        "1/2 taza de champinones salteados",
+                        "Arugula libre",
+                        "60 g de salmon a la plancha",
+                        "1 cda de aliño"
+                    ]
+                },
+                {
+                    "titulo": "Crema de verduras con pollo",
+                    "items": [
+                        "Crema de verduras o champinones casera",
+                        "60 g de pollo cocido",
+                        "1 pan pita en crutones"
+                    ]
+                }
             ]
         }
     },
     "alimentos": {
-        // ─── LÁCTEOS (desayuno y media tarde) ───────────────────────────────
         "lacteos": [
-            "1 vaso de yogurt light (200 ml)",
-            "½ vaso de yogurt griego descremado (100–120 ml)",
-            "2 tajadas delgadas de queso fresco light",
-            "2 tajadas de queso amarillo light (Edam, Paria u otros)",
-            "1 vaso de leche fresca light o semidescremada",
-            "1 vaso de leche fresca sin lactosa light o semidescremada",
-            "½ taza de leche evaporada semidescremada",
-            "½ taza de leche evaporada semidescremada sin lactosa",
-            "1 cucharadita de queso crema light"
+            "3/4 taza de yogurt griego natural",
+            "1/2 taza de yogurt natural",
+            "1 taza de leche",
+            "40 g de queso fresco bajo en grasa",
+            "2 tajadas de queso fresco (30-40 g c/u)",
+            "30 g de queso cottage o skyr"
         ],
-        // ─── HUEVOS (desayuno) ──────────────────────────────────────────────
         "huevos": [
-            "1 huevo entero (revuelto, sancochado u omelette)",
-            "2 claras de huevo (revueltas, sancochadas u omelette)"
+            "2 huevos cocidos",
+            "Omelette de 2 huevos",
+            "3 claras de huevo",
+            "1 huevo cocido"
         ],
-        // ─── CEREALES DESAYUNO y MEDIA TARDE ───────────────────────────────
         "cereales_desayuno": [
-            "1 tostada o tajada de pan de molde sin gluten",
-            "¼ taza de granola sin miel",
-            "2 panes pequeños sin gluten (15 g aprox.)",
-            "½ taza de avena u otro cereal (quinua, cañihua, etc.)",
-            "2 cucharadas de avena cruda o tostada (priorizar 2–3 veces por semana)",
-            "1 tortilla chica de maíz",
-            "1 pan sin gluten o integral de panadería (30 g)",
-            "½ pan sin gluten de supermercado (30 g)"
+            "2 rapiditas",
+            "2 pan pita",
+            "2 tortillas de maiz",
+            "2 arepas chicas (30 g)",
+            "2 tostadas Bimbo Vital",
+            "3 cdas de avena en hojuelas",
+            "2 panqueques de avena",
+            "2 cdas de granola Union",
+            "1/4 taza de hojuelas de maiz Life Cero",
+            "1 barra de cereal pequena",
+            "1 paquete de galletas Salmas"
         ],
-        // ─── CEREALES ALMUERZO y CENA ───────────────────────────────────────
         "cereales_almuerzo": [
-            "½ taza de arroz o quinua cocida (preferir integral)",
-            "½ taza de pasta sin gluten",
-            "½ taza de puré (papa, camote, yuca u otro tubérculo)",
-            "1 papa pequeña hervida con cáscara",
-            "1 camote pequeño sancochado con cáscara",
-            "½ choclo"
+            "1 taza de pasta cocida",
+            "1 taza de arroz, arroz integral, quinua o trigo cocido",
+            "1 taza de choclo cocido",
+            "1.5 taza de menestra cocida",
+            "1 papa blanca mediana de 230 g con cascara",
+            "3 trozos de yuca cocida de 40 g c/u",
+            "1 papa amarilla mediana de 180 g",
+            "1.5 taza de olluco cocido"
         ],
-        // ─── FRUTA en cubos (desayuno) ──────────────────────────────────────
-        "fruta_cubos": [
-            "½ taza de jugo natural sin azúcar (máximo 1 vez por semana)",
-            "1 taza de Kiwi en cubos",
-            "1 taza de Tuna en cubos",
-            "1 taza de Pitahaya en cubos",
-            "1 taza de Piña en cubos",
-            "1 taza de Papaya en cubos",
-            "1 taza de Melón en cubos",
-            "1 taza de Fresas",
-            "1 taza de Sandía en cubos",
-            "1 Naranja",
-            "10 unidades de Arándanos",
-            "6–7 unidades de Aguaymanto"
+        "cereales_cena": [
+            "1/3 taza de pasta cocida",
+            "1/3 taza de arroz, arroz integral, quinua o trigo cocido",
+            "1/3 taza de choclo cocido",
+            "1/2 taza de menestra cocida",
+            "2 trozos de camote o papa blanca de 80 g c/u",
+            "1 trozo de yuca cocida de 30 g",
+            "1 trozo de papa amarilla de 60 g"
         ],
-        // ─── FRUTA mediana (media mañana) ───────────────────────────────────
-        "fruta_mediana": [
-            "1 Kiwi",
-            "1 Tuna",
-            "1 Granadilla",
-            "10 unidades de Aguaymanto",
-            "1 Mandarina",
-            "1 Manzana",
-            "1 Pera",
-            "1 Durazno"
+        "fruta": [
+            "1/2 platano",
+            "1/2 pera o manzana",
+            "1 taza de sandia o melon",
+            "3/4 taza de papaya",
+            "1/2 taza de pina",
+            "3/4 taza de aguaymanto, arandanos o frambuesas",
+            "1 taza de fresas",
+            "3 higos",
+            "1/2 taza de mango",
+            "1/2 taza de chirimoya",
+            "15 pasas morenas",
+            "2 tunas pequenas",
+            "1 pitahaya mediana",
+            "1 granadilla",
+            "1 mandarina"
         ],
-        // ─── GRASAS para snacks (media mañana y media tarde) ────────────────
         "grasas_snack": [
-            "6 mitades de pecanas",
-            "6 mitades de nueces",
-            "6 nueces de Brasil o cashews",
-            "10 unidades de maní",
-            "1 cucharadita de mantequilla de maní"
+            "1 cda de chia o linaza",
+            "8 almendras",
+            "3 pecanas",
+            "3 nueces",
+            "2 cdas de mantequilla de mani",
+            "1/4 de palta"
         ],
-        // ─── GRASAS para almuerzo y cena ────────────────────────────────────
         "grasas_almuerzo": [
-            "2 cucharadas de palta",
-            "3–4 aceitunas medianas",
-            "1 cucharadita de aceite de oliva",
-            "1 cucharadita de aceite vegetal"
+            "1/8 de palta",
+            "Aliño con limon, mostaza y unas gotas de aceite de oliva"
         ],
-        // ─── GRASAS para cena ───────────────────────────────────────────────
         "grasas_cena": [
-            "2 cucharadas de palta",
-            "3–4 aceitunas medianas",
-            "1 cucharadita de aceite de oliva",
-            "1 cucharadita de aceite vegetal",
-            "6 mitades de pecanas",
-            "6 mitades de nueces"
+            "1/8 de palta",
+            "1 cdta de aceite de oliva",
+            "1 cdta de mostaza",
+            "1 cda de aliño ligero"
         ],
-        // ─── VERDURAS (almuerzo y cena) ─────────────────────────────────────
         "verduras": [
-            "Zanahoria (cocida o fresca)",
-            "Lechuga",
-            "Betarraga",
-            "Tomate",
-            "Brócoli",
-            "Espinaca o Acelga",
-            "Pepino",
-            "Zapallito italiano o Caigua",
-            "½ taza de verduras cocidas variadas",
-            "1 taza de verduras frescas variadas"
+            "2 tazas de ensalada fresca o cocida",
+            "Espinaca, arugula o lechuga",
+            "Germinados, perejil, culantro o apio",
+            "Vainitas, esparragos, brocoli o zucchini",
+            "Tomate, pimiento o zanahoria rallada",
+            "Beterraga, cebolla o berenjena",
+            "Palmitos, poro o champinones",
+            "Alcachofa, coliflor o rabanitos"
         ],
-        // ─── PROTEÍNAS / CARNE almuerzo ─────────────────────────────────────
         "carne_almuerzo": [
-            "½ filete de Pescado (50 g cocido) — máx. 2 veces por semana",
-            "1 hamburguesa mediana de Res — máx. 1 vez por semana",
-            "3 trozos medianos de Res sancochada",
-            "½ filete de Res (tamaño ¾ de mano)",
-            "1 encuentro mediano de Pollo",
-            "½ filete de pechuga de Pollo",
-            "4 nuggets medianos de Pollo",
-            "3 trozos medianos de Pavita para guiso",
-            "1 chuleta de Pavita (solo pulpa)",
-            "2 medallones de Pavita",
-            "2 tajadas de Tofu (30 g c/u)",
-            "2 claras de huevo"
+            "90 g de filete de pechuga de pollo",
+            "90 g de filete de res magra o 6 cdas de bistec molido",
+            "90 g de filete de pescado (preferir salmon, trucha o bonito)",
+            "90 g de pechuga de pavita o de cerdo",
+            "60-80 g de higado o sangrecita",
+            "6 cdas de pollo deshilachado"
         ],
-        // ─── PROTEÍNAS / CARNE cena ─────────────────────────────────────────
         "carne_cena": [
-            "½ filete de Pescado (60 g cocido)",
-            "1 encuentro mediano de Pollo",
-            "½ pechuga de Pollo",
-            "4 nuggets medianos de Pollo",
-            "3 trozos medianos de Pavita para guiso",
-            "1 chuleta de Pavita (solo pulpa)",
-            "2 medallones de Pavita",
-            "1 huevo entero + 1 clara",
-            "3 claras de huevo"
+            "60 g de filete de pechuga de pollo",
+            "60 g de filete de res magra o 4 cdas de bistec molido",
+            "60 g de filete de pescado",
+            "60 g de pechuga de pavita o de cerdo",
+            "60-80 g de higado o sangrecita",
+            "2 tajadas de queso fresco de 30 g c/u",
+            "4 cdas de pollo deshilachado",
+            "4 cdas de atun deshilachado"
         ]
     }
 };
 
-// Exportar para acceso desde otros módulos
 window.dietaBubu = dietaBubu;

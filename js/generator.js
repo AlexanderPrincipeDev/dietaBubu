@@ -30,6 +30,25 @@ class DietGenerator {
         const mealDef = this.data.comidas[mealId];
         if (!mealDef) return null;
 
+        if (mealDef.tipo === 'opciones' && Array.isArray(mealDef.opciones) && mealDef.opciones.length > 0) {
+            const selectedOption = mealDef.opciones[Math.floor(Math.random() * mealDef.opciones.length)];
+
+            return {
+                mealId,
+                mealName: this.formatMealName(mealId),
+                subtitle: mealDef.horaAprox,
+                mode: 'opciones',
+                selectedOption,
+                items: (selectedOption.items || []).map((itemName, index) => ({
+                    categoria: 'opcion',
+                    name: itemName,
+                    lockedKey: `${mealId}-opcion-${index}`,
+                    isLocked: false
+                })),
+                porcionesDef: []
+            };
+        }
+
         let generatedMenu = [];
 
         mealDef.porciones.forEach(porcion => {
@@ -152,8 +171,24 @@ class DietGenerator {
             }
         }
 
+        const optionMealMatches = [];
+        for (const [mealId, mealDef] of Object.entries(this.data.comidas)) {
+            if (!Array.isArray(mealDef.opciones)) continue;
+
+            mealDef.opciones.forEach((option) => {
+                const matchedItems = (option.items || []).filter(item => item.toLowerCase().includes(query));
+                if (matchedItems.length > 0) {
+                    optionMealMatches.push({
+                        mealId,
+                        titulo: option.titulo,
+                        items: matchedItems
+                    });
+                }
+            });
+        }
+
         // 3. Si no está en ninguna categoría, revisar alertas de No Permitidos
-        if (categoryMatches.length === 0) {
+        if (categoryMatches.length === 0 && optionMealMatches.length === 0) {
             const malMatch = this.data.noPermitidos.find(n => n.toLowerCase().includes(query));
             if (malMatch) {
                 return [{ isWarning: true, message: `⚠️ Cuidado: "${malMatch}" está en tu lista de NO PERMITIDOS.` }];
@@ -166,7 +201,9 @@ class DietGenerator {
             const compatibleMeals = [];
             for (const [mealId, mealDef] of Object.entries(this.data.comidas)) {
                 // Check if this meal requires this category
-                const requires = mealDef.porciones.find(p => p.categoria === match.categoria);
+                const requires = Array.isArray(mealDef.porciones)
+                    ? mealDef.porciones.find(p => p.categoria === match.categoria)
+                    : null;
                 if (requires) {
                     compatibleMeals.push({
                         meal: this.formatMealName(mealId),
@@ -181,6 +218,7 @@ class DietGenerator {
                 'CEREALES_DESAYUNO': 'CEREALES (DESAYUNO / MEDIA TARDE)',
                 'CEREALES_ALMUERZO': 'CEREALES (ALMUERZO / CENA)',
                 'CEREALES_CENA':     'CEREALES (CENA)',
+                'FRUTA':             'FRUTA',
                 'FRUTA_CUBOS':       'FRUTA EN CUBOS (DESAYUNO)',
                 'FRUTA_MEDIANA':     'FRUTA MEDIANA (MEDIA MAÑANA)',
                 'GRASAS_SNACK':      'GRASAS (SNACK — FRUTOS SECOS)',
@@ -195,6 +233,18 @@ class DietGenerator {
                 categoria: formattedCat,
                 alimentosReales: match.ejemplos,
                 comidasPosibles: compatibleMeals
+            });
+        });
+
+        optionMealMatches.forEach(match => {
+            results.push({
+                isWarning: false,
+                categoria: `OPCIONES DE ${this.formatMealName(match.mealId).toUpperCase()}`,
+                alimentosReales: match.items,
+                comidasPosibles: [{
+                    meal: this.formatMealName(match.mealId),
+                    detalle: match.titulo
+                }]
             });
         });
 
@@ -259,14 +309,17 @@ class DietGenerator {
             { keywords: ['pasta', 'fideos'], label: 'Pasta' },
             { keywords: ['papa', 'camote', 'yuca'], label: 'Tubérculos (Papa/Camote)' },
             { keywords: ['pescado'], label: 'Pescado' },
+            { keywords: ['salmon', 'trucha', 'bonito', 'atun'], label: 'Pescado' },
             { keywords: ['pollo'], label: 'Pollo' },
             { keywords: [' res', 'carne de res'], label: 'Carne de Res' },
-            { keywords: ['pavita'], label: 'Pavita' },
+            { keywords: ['pavita', 'jamon de pavo'], label: 'Pavita / Pavo' },
+            { keywords: ['cerdo'], label: 'Cerdo' },
+            { keywords: ['higado', 'sangrecita'], label: 'Hierro animal' },
             { keywords: ['palta'], label: 'Palta' },
             { keywords: ['aceituna'], label: 'Aceitunas' },
             { keywords: ['aceite'], label: 'Aceite (Oliva/Vegetal)' },
-            { keywords: ['nueces', 'pecanas', 'cashews', 'maní', 'almendras'], label: 'Frutos Secos' },
-            { keywords: ['fresas', 'kiwi', 'piña', 'naranja', 'arándanos', 'aguaymanto', 'sandía', 'papaya', 'melón', 'pera', 'manzana', 'durazno', 'granadilla', 'mandarina', 'tuna'], label: 'Frutas' },
+            { keywords: ['nueces', 'pecanas', 'cashews', 'mani', 'maní', 'almendras', 'chia', 'linaza'], label: 'Frutos Secos y Semillas' },
+            { keywords: ['fresas', 'kiwi', 'pina', 'piña', 'naranja', 'arandanos', 'arándanos', 'aguaymanto', 'sandia', 'sandía', 'papaya', 'melon', 'melón', 'pera', 'manzana', 'durazno', 'granadilla', 'mandarina', 'tuna', 'pitahaya', 'mango', 'platano', 'plátano', 'higo'], label: 'Frutas' },
             { keywords: ['zanahoria'], label: 'Zanahoria' },
             { keywords: ['lechuga'], label: 'Lechuga' },
             { keywords: ['betarraga'], label: 'Betarraga' },
@@ -275,29 +328,20 @@ class DietGenerator {
             { keywords: ['espinaca', 'acelga'], label: 'Espinaca / Acelga' },
             { keywords: ['pepino'], label: 'Pepino' },
             { keywords: ['zapallito', 'caigua'], label: 'Zapallito / Caigua' },
+            { keywords: ['alcachofa', 'champinones', 'champiñones', 'arugula', 'arrugula', 'palmitos', 'coliflor', 'esparragos', 'espárragos'], label: 'Verduras Variadas' },
             { keywords: ['verdura', 'ensalada'], label: 'Verduras Variadas' }
         ];
 
-        const categories = [
-            'lacteos', 'huevos', 'cereales_desayuno', 'cereales_almuerzo', 
-            'fruta_cubos', 'fruta_mediana', 'grasas_snack', 'grasas_almuerzo', 
-            'grasas_cena', 'verduras', 'carne_almuerzo', 'carne_cena'
-        ];
+        const categories = Object.keys(this.data.alimentos || {});
 
-        const catMap = {
-            'lacteos': 'lacteos',
-            'huevos': 'proteinas',
-            'cereales_desayuno': 'cereales',
-            'cereales_almuerzo': 'cereales',
-            'cereales_cena': 'cereales',
-            'fruta_cubos': 'fruta',
-            'fruta_mediana': 'fruta',
-            'grasas_snack': 'grasas',
-            'grasas_almuerzo': 'grasas',
-            'grasas_cena': 'grasas',
-            'verduras': 'verduras',
-            'carne_almuerzo': 'proteinas',
-            'carne_cena': 'proteinas'
+        const resolveCategory = (cat) => {
+            if (cat.includes('lact')) return 'lacteos';
+            if (cat.includes('huevo') || cat.includes('carne')) return 'proteinas';
+            if (cat.includes('cereal')) return 'cereales';
+            if (cat.includes('fruta')) return 'fruta';
+            if (cat.includes('grasa')) return 'grasas';
+            if (cat.includes('verd')) return 'verduras';
+            return 'proteinas';
         };
 
         categories.forEach(cat => {
@@ -314,7 +358,7 @@ class DietGenerator {
                     finalLabel = rule.label;
                 }
 
-                const groupCat = catMap[cat] || cat;
+                const groupCat = resolveCategory(cat);
                 const key = `${groupCat}|${finalLabel}`;
                 if (!smartAgrupado[key]) {
                     smartAgrupado[key] = {

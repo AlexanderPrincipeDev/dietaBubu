@@ -34,8 +34,12 @@ class DietaApp {
         if (cachedDiet) {
             try {
                 const parsed = JSON.parse(cachedDiet);
-                Object.assign(this.generator.data, parsed);
-                window.dietaBubu = this.generator.data;
+                if (parsed.version && parsed.version === this.generator.data.version) {
+                    Object.assign(this.generator.data, parsed);
+                    window.dietaBubu = this.generator.data;
+                } else {
+                    localStorage.removeItem('cloudDietData');
+                }
             } catch (e) { }
         }
 
@@ -74,6 +78,10 @@ class DietaApp {
             this.saveState('hasWalked', false);
             this.saveState('lastCheckDate', today);
         }
+    }
+
+    getWaterGoal() {
+        return this.generator.data?.hidratacion?.metaVasos || 8;
     }
 
     /* --- DARK MODE --- */
@@ -175,13 +183,16 @@ class DietaApp {
             const doc = await docRef.get();
             if (doc.exists) {
                 const cloudData = doc.data();
-                Object.assign(this.generator.data, cloudData);
-                window.dietaBubu = this.generator.data;
-                localStorage.setItem('cloudDietData', JSON.stringify(window.dietaBubu));
+                if (cloudData.version && cloudData.version === this.generator.data.version) {
+                    Object.assign(this.generator.data, cloudData);
+                    window.dietaBubu = this.generator.data;
+                    localStorage.setItem('cloudDietData', JSON.stringify(window.dietaBubu));
+                }
 
                 // Refresh UI with latest data
                 this.setupShoppingList();
                 this.renderMenu();
+                this.setupTracker();
                 this.setupAlerts();
             }
         } catch (e) {
@@ -327,7 +338,7 @@ class DietaApp {
         const themeColorMeta = document.getElementById('theme-color-meta');
         if (!themeColorMeta) return;
 
-        themeColorMeta.setAttribute('content', this.isDarkMode ? '#3e322f' : '#ff8a65');
+        themeColorMeta.setAttribute('content', this.isDarkMode ? '#2f2a35' : '#fff4ef');
     }
 
     /* --- HEADER (Saludo dinamico) --- */
@@ -402,10 +413,27 @@ class DietaApp {
     }
 
     shareMenu() {
-        const menuData = this.generator.generateMenu(this.currentMealId);
+        const menuData = this.currentMenuData && this.currentMenuData.mealId === this.currentMealId
+            ? this.currentMenuData
+            : this.generator.generateMenu(this.currentMealId);
         if (!menuData) return;
 
         let text = `*${menuData.mealName} - Dieta Bubu* 🤰\n\n`;
+
+        if (menuData.mode === 'opciones' && menuData.selectedOption) {
+            text += `*${menuData.selectedOption.titulo}*\n`;
+            menuData.items.forEach(item => {
+                text += `• ${item.name}\n`;
+            });
+            if (menuData.selectedOption.nota) {
+                text += `\n_${menuData.selectedOption.nota}_`;
+            }
+            text += `\n\n_Generado el ${new Date().toLocaleDateString('es-ES')}_`;
+            const encodedText = encodeURIComponent(text);
+            const whatsappUrl = `https://wa.me/?text=${encodedText}`;
+            window.open(whatsappUrl, '_blank');
+            return;
+        }
 
         // 1. Agrupar los items por categoria (reutilizando lógica de render para consistencia)
         const groupedItems = {};
@@ -501,6 +529,7 @@ class DietaApp {
     renderMenu() {
         const container = document.getElementById('meal-portions-container');
         const menuData = this.generator.generateMenu(this.currentMealId);
+        this.currentMenuData = menuData;
 
         if (!menuData) {
             container.innerHTML = '<p>Error al generar el menú.</p>';
@@ -508,6 +537,39 @@ class DietaApp {
         }
 
         container.innerHTML = ''; // Limpiar
+
+        if (menuData.mode === 'opciones' && menuData.selectedOption) {
+            const optionCard = document.createElement('div');
+            optionCard.className = 'category-group mt-3';
+
+            const titleEl = document.createElement('h3');
+            titleEl.className = 'category-title';
+            titleEl.textContent = menuData.selectedOption.titulo;
+            optionCard.appendChild(titleEl);
+
+            menuData.items.forEach(item => {
+                const el = document.createElement('div');
+                el.className = 'portion-item section-anim';
+                el.innerHTML = `
+                    <div class="portion-icon">🍽️</div>
+                    <div class="portion-text">
+                        <p>${item.name}</p>
+                    </div>
+                `;
+                optionCard.appendChild(el);
+            });
+
+            if (menuData.selectedOption.nota) {
+                const noteEl = document.createElement('p');
+                noteEl.className = 'placeholder-text';
+                noteEl.style.marginTop = '0.75rem';
+                noteEl.textContent = menuData.selectedOption.nota;
+                optionCard.appendChild(noteEl);
+            }
+
+            container.appendChild(optionCard);
+            return;
+        }
 
         // 1. Agrupar los items por categoria
         const groupedItems = {};
@@ -621,6 +683,11 @@ class DietaApp {
         this.renderWaterTracker();
         const walkBtn = document.getElementById('btn-walk');
         const walkIcon = document.getElementById('walk-icon');
+        const waterGoalText = document.getElementById('water-goal-text');
+
+        if (waterGoalText) {
+            waterGoalText.textContent = this.generator.data?.hidratacion?.metaTexto || 'Meta: 1.8 L minimo al dia';
+        }
 
         if (this.hasWalked) {
             if (walkBtn) {
@@ -637,14 +704,14 @@ class DietaApp {
     renderWaterTracker() {
         const container = document.getElementById('water-tracker');
         const progressText = document.getElementById('water-progress-text');
+        const goal = this.getWaterGoal();
 
         container.innerHTML = '';
         if (progressText) {
-            progressText.textContent = `${this.waterGlasses}/8 Vasos`;
+            progressText.textContent = `${this.waterGlasses}/${goal} Vasos`;
         }
 
-        // 8 Vasos
-        for (let i = 0; i < 8; i++) {
+        for (let i = 0; i < goal; i++) {
             const glass = document.createElement('div');
             glass.className = `glass ${i < this.waterGlasses ? 'filled' : ''}`;
             // Use drop icon instead of droplet for the new shape
@@ -660,8 +727,7 @@ class DietaApp {
                 }
                 this.saveState('waterGlasses', this.waterGlasses);
 
-                // Trigger Confetti si completa los 8 vasos
-                if (this.waterGlasses === 8) {
+                if (this.waterGlasses === goal) {
                     this.triggerConfetti();
                 }
 
@@ -759,7 +825,7 @@ class DietaApp {
                             </ul>
                             <p style="font-size: 0.9em; color:var(--text-muted);"><strong>Puedes comerlo en:</strong></p>
                             <ul style="margin-left: 20px; font-size: 0.9em;">
-                                ${res.comidasPosibles.map(c => `<li>${c.meal} (${c.cantidad} porcion/es)</li>`).join('')}
+                                ${res.comidasPosibles.map(c => `<li>${c.meal} (${c.detalle || `${c.cantidad} porcion/es`})</li>`).join('')}
                             </ul>
                         </div>`;
                     }
@@ -804,6 +870,44 @@ class DietaApp {
                 div.className = 'tip-item';
                 div.innerHTML = `<i class="ti ti-check"></i> <p>${item}</p>`;
                 tipsList.appendChild(div);
+            });
+        }
+
+        const symptomsList = document.getElementById('digestive-symptoms-list');
+        if (symptomsList) {
+            symptomsList.innerHTML = '';
+            Object.entries(this.generator.data.sintomasDigestivos || {}).forEach(([title, items]) => {
+                const div = document.createElement('div');
+                div.className = 'tip-item';
+                div.innerHTML = `
+                    <div>
+                        <strong style="display:block; margin-bottom:0.35rem;">${title}</strong>
+                        <p>${items.join(' · ')}</p>
+                    </div>
+                `;
+                symptomsList.appendChild(div);
+            });
+        }
+
+        const ironList = document.getElementById('iron-foods-list');
+        if (ironList) {
+            ironList.innerHTML = '';
+            (this.generator.data.alimentosHierro || []).forEach(item => {
+                const span = document.createElement('span');
+                span.className = 'chip drink-chip';
+                span.textContent = item;
+                ironList.appendChild(span);
+            });
+        }
+
+        const folateList = document.getElementById('folate-foods-list');
+        if (folateList) {
+            folateList.innerHTML = '';
+            (this.generator.data.alimentosFolato || []).forEach(item => {
+                const span = document.createElement('span');
+                span.className = 'chip drink-chip';
+                span.textContent = item;
+                folateList.appendChild(span);
             });
         }
     }
@@ -914,9 +1018,9 @@ class DietaApp {
 
             ctx.beginPath();
             ctx.arc(W / 2, H / 2, 10, 0, Math.PI * 2);
-            ctx.fillStyle = '#ff8a65';
+            ctx.fillStyle = '#f57486';
             ctx.fill();
-            ctx.strokeStyle = isDark ? '#3e322f' : 'white';
+            ctx.strokeStyle = isDark ? '#2f2a35' : 'white';
             ctx.lineWidth = 3;
             ctx.stroke();
 
@@ -944,10 +1048,10 @@ class DietaApp {
 
         const isDark = document.body.classList.contains('dark-mode');
         const textColor = isDark ? '#bcaaa4' : '#8d6e63';
-        const lineColor = '#ff8a65';
-        const pointColor = '#ff8a65';
-        const fillStart = 'rgba(255,138,101,0.18)';
-        const fillEnd = 'rgba(255,138,101,0)';
+        const lineColor = '#f57486';
+        const pointColor = '#f57486';
+        const fillStart = 'rgba(245,116,134,0.18)';
+        const fillEnd = 'rgba(245,116,134,0)';
         const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(141,110,99,0.1)';
 
         const PAD = { top: 20, right: 16, bottom: 40, left: 44 };
@@ -1025,7 +1129,7 @@ class DietaApp {
             ctx.arc(toX(i), toY(d.weight), 4, 0, Math.PI * 2);
             ctx.fillStyle = pointColor;
             ctx.fill();
-            ctx.strokeStyle = isDark ? '#3e322f' : 'white';
+            ctx.strokeStyle = isDark ? '#2f2a35' : 'white';
             ctx.lineWidth = 2;
             ctx.stroke();
         });

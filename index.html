@@ -10,7 +10,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Tabler Icons -->
     <link rel="stylesheet" href="vendor/tabler-icons/tabler-icons.min.css">
@@ -24,7 +24,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Dieta Bubu">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="theme-color" content="#ff8a65" id="theme-color-meta">
+    <meta name="theme-color" content="#fff4ef" id="theme-color-meta">
     <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
     <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
@@ -112,8 +112,8 @@
                     <div class="water-tracker-container">
                         <div style="text-align: center;">
                             <h3>💧 Consumo de Agua</h3>
-                            <p class="tracker-desc">Meta: 6 a 8 vasos diarios</p>
-                            <div class="water-progress-text" id="water-progress-text">0/8 Vasos</div>
+                            <p class="tracker-desc" id="water-goal-text">Meta: 1.8 L minimo al dia</p>
+                            <div class="water-progress-text" id="water-progress-text">0/9 Vasos</div>
                         </div>
                         <div class="water-glasses" id="water-tracker">
                             <!-- Water glasses rendered via JS -->
@@ -193,6 +193,27 @@
                 <div class="guide-section glass-card mt-3">
                     <h3><i class="ti ti-cup text-secondary"></i> Bebidas Permitidas</h3>
                     <div id="allowed-drinks-list" class="chips-container mt-2">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <div class="guide-section glass-card mt-3">
+                    <h3><i class="ti ti-stethoscope text-secondary"></i> Sintomas Digestivos</h3>
+                    <div id="digestive-symptoms-list" class="tips-grid">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <div class="guide-section glass-card mt-3">
+                    <h3><i class="ti ti-flame text-primary"></i> Alimentos Ricos en Hierro</h3>
+                    <div id="iron-foods-list" class="chips-container mt-2">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <div class="guide-section glass-card mt-3">
+                    <h3><i class="ti ti-leaf text-secondary"></i> Alimentos Ricos en Folato</h3>
+                    <div id="folate-foods-list" class="chips-container mt-2">
                         <!-- Populated by JS -->
                     </div>
                 </div>

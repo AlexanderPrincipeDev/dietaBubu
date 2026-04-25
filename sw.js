@@ -1,5 +1,5 @@
-const STATIC_CACHE = 'dieta-bubu-static-v9';
-const RUNTIME_CACHE = 'dieta-bubu-runtime-v9';
+const STATIC_CACHE = 'dieta-bubu-static-v10';
+const RUNTIME_CACHE = 'dieta-bubu-runtime-v10';
 const APP_SHELL = './index.html';
 const SAME_ORIGIN_ASSETS = [
     './',
